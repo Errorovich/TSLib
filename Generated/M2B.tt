@@ -31,28 +31,38 @@ namespace TSLib.Full.Book
 	public partial class Connection
 	{
 #pragma warning disable IDE0017, CS0472 // Ignore "Object initialization can be simplified", "Something with == and null..."
-	<# foreach (var rule in genm2b.rule) {
-		var msg = genmsg.NotifiesSorted.First(x => x.name == rule.from);
-		var bookItem = genbook.@struct.First(x => x.name == rule.to);
+	<# foreach (var ruleGroup in genm2b.rule.GroupBy(x => x.from)) {
+		var msg = genmsg.NotifiesSorted.First(x => x.name == ruleGroup.Key);
 	#>
 		public void Update<#= msg.name #>(<#= msg.name #> msg)
 		{
-			<# var idStr = string.Join(", ", rule.id.Select(x => $"msg.{x}"));
-
+			<#
 		ClearIndent();
 		PushIndent("\t\t\t");
+		// Several rules may map the same message to different book structs
+		// (e.g. ChannelEdited -> Channel + OptionalChannelData); emit each in its own scope.
+		foreach (var rule in ruleGroup) {
+			var bookItem = genbook.@struct.First(x => x.name == rule.to);
+			var idStr = string.Join(", ", rule.id.Select(x => $"msg.{x}"));
+			// structs marked opt=true may legitimately be absent locally -> skip silently
+			bool optStruct = bookItem.opt == true;
+
 		switch (rule.operation)
 		{
 		case "add":
 		case "update":
-			if (rule.operation == "add")
+			WriteLine("{");
+			if (rule.operation == "add") {
 				WriteLine($"var obj = new {rule.to}();");
-			else
-				WriteLine($@"var obj = Get{rule.to}({idStr});
-			if (obj == null) {{
+			} else {
+				WriteLine($"var obj = Get{rule.to}({idStr});");
+				if (optStruct)
+					WriteLine("if (obj != null) {");
+				else
+					WriteLine($@"if (obj == null) {{
 				Log.Warn(""Internal Book protocol error. Update '{msg.name}' has no local object ({{$msg}})"", msg);
-				return;
-			}}");
+			}} else {{");
+			}
 
 			foreach (var prop in rule.properties.OrderBy(x => x.to)) {
 				void WriteMove(string from, string to) {
@@ -70,6 +80,11 @@ namespace TSLib.Full.Book
 								WriteLine($"{{ var tmpv = {from}; if (tmpv != null) obj.{to} = ({bookProp.type})tmpv; }}");
 						} else if (bookProp.mod == "array") {
 							//WriteLine($"obj.{to}.Add({from});");
+							if (prop.operation == "add")
+								WriteLine($"{{ var tmpa = {from}; if (tmpa != null) obj.{to}.AddRange(tmpa); }}");
+							else
+								WriteLine($"{{ var tmpa = {from}; if (tmpa != null) {{ obj.{to}.Clear(); obj.{to}.AddRange(tmpa); }} }}");
+						} else if (bookProp.mod == "set") {
 							if (prop.operation == "add")
 								WriteLine($"{{ var tmpa = {from}; if (tmpa != null) obj.{to}.UnionWith(tmpa); }}");
 							else
@@ -110,15 +125,18 @@ namespace TSLib.Full.Book
 					}
 				}
 			}
-			if (rule.operation == "add") {
+			if (rule.operation == "add")
 				WriteLine($"Set{rule.to}(obj{(string.IsNullOrEmpty(idStr) ? "" : (", " + idStr))});");
-			}
+			else
+				WriteLine("}");
+			WriteLine("}");
 			break;
 
-		case "remove":#>
-			Remove<#=rule.to#>(<#=idStr#>);<#
+		case "remove":
+			WriteLine($"Remove{rule.to}({idStr});");
 			break;
-		} #>
+		}
+		} /* rules */ #>
 			Post<#= msg.name #>(msg);
 		}
 

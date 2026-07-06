@@ -314,7 +314,7 @@ namespace TSLib.Full
 			if (ctx is null) throw new InvalidOperationException("context should be set");
 
 			ctx.PacketHandler.ClientId = initServer.ClientId;
-			var serverVersion = TsVersion.TryParse(initServer.ServerVersion, initServer.ServerPlatform);
+			var serverVersion = TsVersion.TryParse(initServer.Version, initServer.Platform);
 			if (serverVersion != null)
 				ServerConstants = TsConst.GetByServerBuildNum(serverVersion.Build);
 
@@ -728,14 +728,14 @@ namespace TSLib.Full
 				{ "size", fileSize },
 				{ "overwrite", overwrite },
 				{ "resume", resume }
-			}, NotificationType.FileUpload, NotificationType.FileTransferStatus);
+			}, NotificationType.FileUpload, NotificationType.FiletransferStatus);
 			if (!result.Ok)
 				return result.Error;
 			if (result.Value.NotifyType == NotificationType.FileUpload)
 				return result.MapToSingle<FileUpload>();
 			else
 			{
-				var ftresult = result.MapToSingle<FileTransferStatus>();
+				var ftresult = result.MapToSingle<FiletransferStatus>();
 				if (!ftresult)
 					return ftresult.Error;
 				return new CommandError() { Id = ftresult.Value.Status, Message = ftresult.Value.Message };
@@ -750,14 +750,14 @@ namespace TSLib.Full
 				{ "name", path },
 				{ "cpw", channelPassword },
 				{ "clientftfid", clientTransferId },
-				{ "seekpos", seek } }, NotificationType.FileDownload, NotificationType.FileTransferStatus);
+				{ "seekpos", seek } }, NotificationType.FileDownload, NotificationType.FiletransferStatus);
 			if (!result.Ok)
 				return result.Error;
 			if (result.Value.NotifyType == NotificationType.FileDownload)
 				return result.MapToSingle<FileDownload>();
 			else
 			{
-				var ftresult = result.MapToSingle<FileTransferStatus>();
+				var ftresult = result.MapToSingle<FiletransferStatus>();
 				if (!ftresult)
 					return ftresult.Error;
 				return new CommandError() { Id = ftresult.Value.Status, Message = ftresult.Value.Message };

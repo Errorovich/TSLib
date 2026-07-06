@@ -13,17 +13,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 using System;
 using TSLib.Helper;
 using TSLib.Messages;
@@ -59,14 +48,12 @@ namespace TSLib.Query
 		public override event NotifyEventHandler<TokenUsed>? OnTokenUsed;
 		public override event EventHandler<TokenUsed>? OnEachTokenUsed;
 
-
 		private void InvokeEvent(LazyNotification lazyNotification)
 		{
 			var ntf = lazyNotification.Notifications;
 			switch (lazyNotification.NotifyType)
 			{
-			
-			case NotificationType.ChannelChanged: {
+						case NotificationType.ChannelChanged: {
 				var ntfc = (ChannelChanged[])ntf;
 				OnChannelChanged?.Invoke(this, ntfc);
 				var ev = OnEachChannelChanged;
@@ -75,8 +62,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelCreated: {
+						case NotificationType.ChannelCreated: {
 				var ntfc = (ChannelCreated[])ntf;
 				OnChannelCreated?.Invoke(this, ntfc);
 				var ev = OnEachChannelCreated;
@@ -85,8 +71,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelDeleted: {
+						case NotificationType.ChannelDeleted: {
 				var ntfc = (ChannelDeleted[])ntf;
 				OnChannelDeleted?.Invoke(this, ntfc);
 				var ev = OnEachChannelDeleted;
@@ -95,8 +80,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelEdited: {
+						case NotificationType.ChannelEdited: {
 				var ntfc = (ChannelEdited[])ntf;
 				OnChannelEdited?.Invoke(this, ntfc);
 				var ev = OnEachChannelEdited;
@@ -105,8 +89,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelMoved: {
+						case NotificationType.ChannelMoved: {
 				var ntfc = (ChannelMoved[])ntf;
 				OnChannelMoved?.Invoke(this, ntfc);
 				var ev = OnEachChannelMoved;
@@ -115,8 +98,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelPasswordChanged: {
+						case NotificationType.ChannelPasswordChanged: {
 				var ntfc = (ChannelPasswordChanged[])ntf;
 				OnChannelPasswordChanged?.Invoke(this, ntfc);
 				var ev = OnEachChannelPasswordChanged;
@@ -125,8 +107,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.ClientEnterView: {
+						case NotificationType.ClientEnterView: {
 				var ntfc = (ClientEnterView[])ntf;
 				OnClientEnterView?.Invoke(this, ntfc);
 				var ev = OnEachClientEnterView;
@@ -135,8 +116,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.ClientLeftView: {
+						case NotificationType.ClientLeftView: {
 				var ntfc = (ClientLeftView[])ntf;
 				OnClientLeftView?.Invoke(this, ntfc);
 				var ev = OnEachClientLeftView;
@@ -145,8 +125,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.ClientMoved: {
+						case NotificationType.ClientMoved: {
 				var ntfc = (ClientMoved[])ntf;
 				OnClientMoved?.Invoke(this, ntfc);
 				var ev = OnEachClientMoved;
@@ -155,8 +134,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.ServerEdited: {
+						case NotificationType.ServerEdited: {
 				var ntfc = (ServerEdited[])ntf;
 				OnServerEdited?.Invoke(this, ntfc);
 				var ev = OnEachServerEdited;
@@ -165,8 +143,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.TextMessage: {
+						case NotificationType.TextMessage: {
 				var ntfc = (TextMessage[])ntf;
 				OnTextMessage?.Invoke(this, ntfc);
 				var ev = OnEachTextMessage;
@@ -175,8 +152,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.TokenUsed: {
+						case NotificationType.TokenUsed: {
 				var ntfc = (TokenUsed[])ntf;
 				OnTokenUsed?.Invoke(this, ntfc);
 				var ev = OnEachTokenUsed;
@@ -185,8 +161,7 @@ namespace TSLib.Query
 				}
 				break;
 			}
-			
-			case NotificationType.CommandError: break;
+						case NotificationType.CommandError: break;
 			case NotificationType.Unknown:
 			default:
 				throw Tools.UnhandledDefault(lazyNotification.NotifyType);

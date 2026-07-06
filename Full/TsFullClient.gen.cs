@@ -13,17 +13,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 using System;
 using TSLib.Helper;
 using TSLib.Messages;
@@ -48,6 +37,8 @@ namespace TSLib.Full
 		public event EventHandler<ChannelDescriptionChanged>? OnEachChannelDescriptionChanged;
 		public override event NotifyEventHandler<ChannelEdited>? OnChannelEdited;
 		public override event EventHandler<ChannelEdited>? OnEachChannelEdited;
+		public event NotifyEventHandler<ChannelEditedLow>? OnChannelEditedLow;
+		public event EventHandler<ChannelEditedLow>? OnEachChannelEditedLow;
 		public event NotifyEventHandler<ChannelGroupClientList>? OnChannelGroupClientList;
 		public event EventHandler<ChannelGroupClientList>? OnEachChannelGroupClientList;
 		public event NotifyEventHandler<ChannelGroupList>? OnChannelGroupList;
@@ -128,10 +119,10 @@ namespace TSLib.Full
 		public event EventHandler<FileList>? OnEachFileList;
 		public event NotifyEventHandler<FileListFinished>? OnFileListFinished;
 		public event EventHandler<FileListFinished>? OnEachFileListFinished;
-		public event NotifyEventHandler<FileTransfer>? OnFileTransfer;
-		public event EventHandler<FileTransfer>? OnEachFileTransfer;
-		public event NotifyEventHandler<FileTransferStatus>? OnFileTransferStatus;
-		public event EventHandler<FileTransferStatus>? OnEachFileTransferStatus;
+		public event NotifyEventHandler<Filetransfer>? OnFiletransfer;
+		public event EventHandler<Filetransfer>? OnEachFiletransfer;
+		public event NotifyEventHandler<FiletransferStatus>? OnFiletransferStatus;
+		public event EventHandler<FiletransferStatus>? OnEachFiletransferStatus;
 		public event NotifyEventHandler<FileUpload>? OnFileUpload;
 		public event EventHandler<FileUpload>? OnEachFileUpload;
 		public event NotifyEventHandler<InitIvExpand>? OnInitIvExpand;
@@ -179,970 +170,913 @@ namespace TSLib.Full
 		public override event NotifyEventHandler<TokenUsed>? OnTokenUsed;
 		public override event EventHandler<TokenUsed>? OnEachTokenUsed;
 
-
 		private void InvokeEvent(LazyNotification lazyNotification)
 		{
 			var ntf = lazyNotification.Notifications;
 			switch (lazyNotification.NotifyType)
 			{
-			
-			case NotificationType.BanList: {
+						case NotificationType.BanList: {
 				var ntfc = (BanList[])ntf;
 				ProcessBanList(ntfc);
 				OnBanList?.Invoke(this, ntfc);
 				var ev = OnEachBanList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachBanList(that);
+									ProcessEachBanList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelChanged: {
+						case NotificationType.ChannelChanged: {
 				var ntfc = (ChannelChanged[])ntf;
 				ProcessChannelChanged(ntfc);
 				OnChannelChanged?.Invoke(this, ntfc);
 				var ev = OnEachChannelChanged;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachChannelChanged(that);
+									ProcessEachChannelChanged(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelClientPermList: {
+						case NotificationType.ChannelClientPermList: {
 				var ntfc = (ChannelClientPermList[])ntf;
 				ProcessChannelClientPermList(ntfc);
 				OnChannelClientPermList?.Invoke(this, ntfc);
 				var ev = OnEachChannelClientPermList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachChannelClientPermList(that);
+									ProcessEachChannelClientPermList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelCreated: {
+						case NotificationType.ChannelCreated: {
 				var ntfc = (ChannelCreated[])ntf;
 				ProcessChannelCreated(ntfc);
 				OnChannelCreated?.Invoke(this, ntfc);
 				var ev = OnEachChannelCreated;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateChannelCreated(that);
-					ProcessEachChannelCreated(that);
+									book?.UpdateChannelCreated(that);
+										ProcessEachChannelCreated(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelDeleted: {
+						case NotificationType.ChannelDeleted: {
 				var ntfc = (ChannelDeleted[])ntf;
 				ProcessChannelDeleted(ntfc);
 				OnChannelDeleted?.Invoke(this, ntfc);
 				var ev = OnEachChannelDeleted;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateChannelDeleted(that);
-					ProcessEachChannelDeleted(that);
+									book?.UpdateChannelDeleted(that);
+										ProcessEachChannelDeleted(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelDescriptionChanged: {
+						case NotificationType.ChannelDescriptionChanged: {
 				var ntfc = (ChannelDescriptionChanged[])ntf;
 				ProcessChannelDescriptionChanged(ntfc);
 				OnChannelDescriptionChanged?.Invoke(this, ntfc);
 				var ev = OnEachChannelDescriptionChanged;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachChannelDescriptionChanged(that);
+									book?.UpdateChannelDescriptionChanged(that);
+										ProcessEachChannelDescriptionChanged(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelEdited: {
+						case NotificationType.ChannelEdited: {
 				var ntfc = (ChannelEdited[])ntf;
 				ProcessChannelEdited(ntfc);
 				OnChannelEdited?.Invoke(this, ntfc);
 				var ev = OnEachChannelEdited;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateChannelEdited(that);
-					ProcessEachChannelEdited(that);
+									book?.UpdateChannelEdited(that);
+										ProcessEachChannelEdited(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelGroupClientList: {
+						case NotificationType.ChannelEditedLow: {
+				var ntfc = (ChannelEditedLow[])ntf;
+				ProcessChannelEditedLow(ntfc);
+				OnChannelEditedLow?.Invoke(this, ntfc);
+				var ev = OnEachChannelEditedLow;
+				var book = Book;
+				foreach(var that in ntfc) {
+									book?.UpdateChannelEditedLow(that);
+										ProcessEachChannelEditedLow(that);
+					ev?.Invoke(this, that);
+				}
+				break;
+			}
+						case NotificationType.ChannelGroupClientList: {
 				var ntfc = (ChannelGroupClientList[])ntf;
 				ProcessChannelGroupClientList(ntfc);
 				OnChannelGroupClientList?.Invoke(this, ntfc);
 				var ev = OnEachChannelGroupClientList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachChannelGroupClientList(that);
+									ProcessEachChannelGroupClientList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelGroupList: {
+						case NotificationType.ChannelGroupList: {
 				var ntfc = (ChannelGroupList[])ntf;
 				ProcessChannelGroupList(ntfc);
 				OnChannelGroupList?.Invoke(this, ntfc);
 				var ev = OnEachChannelGroupList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachChannelGroupList(that);
+									book?.UpdateChannelGroupList(that);
+										ProcessEachChannelGroupList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelGroupPermList: {
+						case NotificationType.ChannelGroupPermList: {
 				var ntfc = (ChannelGroupPermList[])ntf;
 				ProcessChannelGroupPermList(ntfc);
 				OnChannelGroupPermList?.Invoke(this, ntfc);
 				var ev = OnEachChannelGroupPermList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachChannelGroupPermList(that);
+									ProcessEachChannelGroupPermList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelList: {
+						case NotificationType.ChannelList: {
 				var ntfc = (ChannelList[])ntf;
 				ProcessChannelList(ntfc);
 				OnChannelList?.Invoke(this, ntfc);
 				var ev = OnEachChannelList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateChannelList(that);
-					ProcessEachChannelList(that);
+									book?.UpdateChannelList(that);
+										ProcessEachChannelList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelListFinished: {
+						case NotificationType.ChannelListFinished: {
 				var ntfc = (ChannelListFinished[])ntf;
 				ProcessChannelListFinished(ntfc);
 				OnChannelListFinished?.Invoke(this, ntfc);
 				var ev = OnEachChannelListFinished;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachChannelListFinished(that);
+									ProcessEachChannelListFinished(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelMoved: {
+						case NotificationType.ChannelMoved: {
 				var ntfc = (ChannelMoved[])ntf;
 				ProcessChannelMoved(ntfc);
 				OnChannelMoved?.Invoke(this, ntfc);
 				var ev = OnEachChannelMoved;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateChannelMoved(that);
-					ProcessEachChannelMoved(that);
+									book?.UpdateChannelMoved(that);
+										ProcessEachChannelMoved(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelPasswordChanged: {
+						case NotificationType.ChannelPasswordChanged: {
 				var ntfc = (ChannelPasswordChanged[])ntf;
 				ProcessChannelPasswordChanged(ntfc);
 				OnChannelPasswordChanged?.Invoke(this, ntfc);
 				var ev = OnEachChannelPasswordChanged;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachChannelPasswordChanged(that);
+									ProcessEachChannelPasswordChanged(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelPermissionHints: {
+						case NotificationType.ChannelPermissionHints: {
 				var ntfc = (ChannelPermissionHints[])ntf;
 				ProcessChannelPermissionHints(ntfc);
 				OnChannelPermissionHints?.Invoke(this, ntfc);
 				var ev = OnEachChannelPermissionHints;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateChannelPermissionHints(that);
-					ProcessEachChannelPermissionHints(that);
+									book?.UpdateChannelPermissionHints(that);
+										ProcessEachChannelPermissionHints(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelPermList: {
+						case NotificationType.ChannelPermList: {
 				var ntfc = (ChannelPermList[])ntf;
 				ProcessChannelPermList(ntfc);
 				OnChannelPermList?.Invoke(this, ntfc);
 				var ev = OnEachChannelPermList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachChannelPermList(that);
+									ProcessEachChannelPermList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelSubscribed: {
+						case NotificationType.ChannelSubscribed: {
 				var ntfc = (ChannelSubscribed[])ntf;
 				ProcessChannelSubscribed(ntfc);
 				OnChannelSubscribed?.Invoke(this, ntfc);
 				var ev = OnEachChannelSubscribed;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateChannelSubscribed(that);
-					ProcessEachChannelSubscribed(that);
+									book?.UpdateChannelSubscribed(that);
+										ProcessEachChannelSubscribed(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ChannelUnsubscribed: {
+						case NotificationType.ChannelUnsubscribed: {
 				var ntfc = (ChannelUnsubscribed[])ntf;
 				ProcessChannelUnsubscribed(ntfc);
 				OnChannelUnsubscribed?.Invoke(this, ntfc);
 				var ev = OnEachChannelUnsubscribed;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateChannelUnsubscribed(that);
-					ProcessEachChannelUnsubscribed(that);
+									book?.UpdateChannelUnsubscribed(that);
+										ProcessEachChannelUnsubscribed(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientChannelGroupChanged: {
+						case NotificationType.ClientChannelGroupChanged: {
 				var ntfc = (ClientChannelGroupChanged[])ntf;
 				ProcessClientChannelGroupChanged(ntfc);
 				OnClientChannelGroupChanged?.Invoke(this, ntfc);
 				var ev = OnEachClientChannelGroupChanged;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateClientChannelGroupChanged(that);
-					ProcessEachClientChannelGroupChanged(that);
+									book?.UpdateClientChannelGroupChanged(that);
+										ProcessEachClientChannelGroupChanged(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientChatClosed: {
+						case NotificationType.ClientChatClosed: {
 				var ntfc = (ClientChatClosed[])ntf;
 				ProcessClientChatClosed(ntfc);
 				OnClientChatClosed?.Invoke(this, ntfc);
 				var ev = OnEachClientChatClosed;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientChatClosed(that);
+									ProcessEachClientChatClosed(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientChatComposing: {
+						case NotificationType.ClientChatComposing: {
 				var ntfc = (ClientChatComposing[])ntf;
 				ProcessClientChatComposing(ntfc);
 				OnClientChatComposing?.Invoke(this, ntfc);
 				var ev = OnEachClientChatComposing;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientChatComposing(that);
+									ProcessEachClientChatComposing(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientConnectionInfo: {
+						case NotificationType.ClientConnectionInfo: {
 				var ntfc = (ClientConnectionInfo[])ntf;
 				ProcessClientConnectionInfo(ntfc);
 				OnClientConnectionInfo?.Invoke(this, ntfc);
 				var ev = OnEachClientConnectionInfo;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateClientConnectionInfo(that);
-					ProcessEachClientConnectionInfo(that);
+									book?.UpdateClientConnectionInfo(that);
+										ProcessEachClientConnectionInfo(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientConnectionInfoUpdateRequest: {
+						case NotificationType.ClientConnectionInfoUpdateRequest: {
 				var ntfc = (ClientConnectionInfoUpdateRequest[])ntf;
 				ProcessClientConnectionInfoUpdateRequest(ntfc);
 				OnClientConnectionInfoUpdateRequest?.Invoke(this, ntfc);
 				var ev = OnEachClientConnectionInfoUpdateRequest;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientConnectionInfoUpdateRequest(that);
+									ProcessEachClientConnectionInfoUpdateRequest(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientDbFind: {
+						case NotificationType.ClientDbFind: {
 				var ntfc = (ClientDbFind[])ntf;
 				ProcessClientDbFind(ntfc);
 				OnClientDbFind?.Invoke(this, ntfc);
 				var ev = OnEachClientDbFind;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientDbFind(that);
+									ProcessEachClientDbFind(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientDbIdFromUid: {
+						case NotificationType.ClientDbIdFromUid: {
 				var ntfc = (ClientDbIdFromUid[])ntf;
 				ProcessClientDbIdFromUid(ntfc);
 				OnClientDbIdFromUid?.Invoke(this, ntfc);
 				var ev = OnEachClientDbIdFromUid;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientDbIdFromUid(that);
+									ProcessEachClientDbIdFromUid(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientDbList: {
+						case NotificationType.ClientDbList: {
 				var ntfc = (ClientDbList[])ntf;
 				ProcessClientDbList(ntfc);
 				OnClientDbList?.Invoke(this, ntfc);
 				var ev = OnEachClientDbList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientDbList(that);
+									ProcessEachClientDbList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientEnterView: {
+						case NotificationType.ClientEnterView: {
 				var ntfc = (ClientEnterView[])ntf;
 				ProcessClientEnterView(ntfc);
 				OnClientEnterView?.Invoke(this, ntfc);
 				var ev = OnEachClientEnterView;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateClientEnterView(that);
-					ProcessEachClientEnterView(that);
+									book?.UpdateClientEnterView(that);
+										ProcessEachClientEnterView(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientIds: {
+						case NotificationType.ClientIds: {
 				var ntfc = (ClientIds[])ntf;
 				ProcessClientIds(ntfc);
 				OnClientIds?.Invoke(this, ntfc);
 				var ev = OnEachClientIds;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientIds(that);
+									ProcessEachClientIds(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientLeftView: {
+						case NotificationType.ClientLeftView: {
 				var ntfc = (ClientLeftView[])ntf;
 				ProcessClientLeftView(ntfc);
 				OnClientLeftView?.Invoke(this, ntfc);
 				var ev = OnEachClientLeftView;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateClientLeftView(that);
-					ProcessEachClientLeftView(that);
+									book?.UpdateClientLeftView(that);
+										ProcessEachClientLeftView(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientMoved: {
+						case NotificationType.ClientMoved: {
 				var ntfc = (ClientMoved[])ntf;
 				ProcessClientMoved(ntfc);
 				OnClientMoved?.Invoke(this, ntfc);
 				var ev = OnEachClientMoved;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateClientMoved(that);
-					ProcessEachClientMoved(that);
+									book?.UpdateClientMoved(that);
+										ProcessEachClientMoved(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientNameFromDbId: {
+						case NotificationType.ClientNameFromDbId: {
 				var ntfc = (ClientNameFromDbId[])ntf;
 				ProcessClientNameFromDbId(ntfc);
 				OnClientNameFromDbId?.Invoke(this, ntfc);
 				var ev = OnEachClientNameFromDbId;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientNameFromDbId(that);
+									ProcessEachClientNameFromDbId(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientNameFromUid: {
+						case NotificationType.ClientNameFromUid: {
 				var ntfc = (ClientNameFromUid[])ntf;
 				ProcessClientNameFromUid(ntfc);
 				OnClientNameFromUid?.Invoke(this, ntfc);
 				var ev = OnEachClientNameFromUid;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientNameFromUid(that);
+									ProcessEachClientNameFromUid(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientNeededPermissions: {
+						case NotificationType.ClientNeededPermissions: {
 				var ntfc = (ClientNeededPermissions[])ntf;
 				ProcessClientNeededPermissions(ntfc);
 				OnClientNeededPermissions?.Invoke(this, ntfc);
 				var ev = OnEachClientNeededPermissions;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientNeededPermissions(that);
+									ProcessEachClientNeededPermissions(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientPermissionHints: {
+						case NotificationType.ClientPermissionHints: {
 				var ntfc = (ClientPermissionHints[])ntf;
 				ProcessClientPermissionHints(ntfc);
 				OnClientPermissionHints?.Invoke(this, ntfc);
 				var ev = OnEachClientPermissionHints;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateClientPermissionHints(that);
-					ProcessEachClientPermissionHints(that);
+									book?.UpdateClientPermissionHints(that);
+										ProcessEachClientPermissionHints(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientPermList: {
+						case NotificationType.ClientPermList: {
 				var ntfc = (ClientPermList[])ntf;
 				ProcessClientPermList(ntfc);
 				OnClientPermList?.Invoke(this, ntfc);
 				var ev = OnEachClientPermList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientPermList(that);
+									ProcessEachClientPermList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientPoke: {
+						case NotificationType.ClientPoke: {
 				var ntfc = (ClientPoke[])ntf;
 				ProcessClientPoke(ntfc);
 				OnClientPoke?.Invoke(this, ntfc);
 				var ev = OnEachClientPoke;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientPoke(that);
+									ProcessEachClientPoke(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientServerGroupAdded: {
+						case NotificationType.ClientServerGroupAdded: {
 				var ntfc = (ClientServerGroupAdded[])ntf;
 				ProcessClientServerGroupAdded(ntfc);
 				OnClientServerGroupAdded?.Invoke(this, ntfc);
 				var ev = OnEachClientServerGroupAdded;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateClientServerGroupAdded(that);
-					ProcessEachClientServerGroupAdded(that);
+									book?.UpdateClientServerGroupAdded(that);
+										ProcessEachClientServerGroupAdded(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientServerGroupRemoved: {
+						case NotificationType.ClientServerGroupRemoved: {
 				var ntfc = (ClientServerGroupRemoved[])ntf;
 				ProcessClientServerGroupRemoved(ntfc);
 				OnClientServerGroupRemoved?.Invoke(this, ntfc);
 				var ev = OnEachClientServerGroupRemoved;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateClientServerGroupRemoved(that);
-					ProcessEachClientServerGroupRemoved(that);
+									book?.UpdateClientServerGroupRemoved(that);
+										ProcessEachClientServerGroupRemoved(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientSetServerQueryLogin: {
+						case NotificationType.ClientSetServerQueryLogin: {
 				var ntfc = (ClientSetServerQueryLogin[])ntf;
 				ProcessClientSetServerQueryLogin(ntfc);
 				OnClientSetServerQueryLogin?.Invoke(this, ntfc);
 				var ev = OnEachClientSetServerQueryLogin;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientSetServerQueryLogin(that);
+									ProcessEachClientSetServerQueryLogin(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientUidFromClid: {
+						case NotificationType.ClientUidFromClid: {
 				var ntfc = (ClientUidFromClid[])ntf;
 				ProcessClientUidFromClid(ntfc);
 				OnClientUidFromClid?.Invoke(this, ntfc);
 				var ev = OnEachClientUidFromClid;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachClientUidFromClid(that);
+									ProcessEachClientUidFromClid(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ClientUpdated: {
+						case NotificationType.ClientUpdated: {
 				var ntfc = (ClientUpdated[])ntf;
 				ProcessClientUpdated(ntfc);
 				OnClientUpdated?.Invoke(this, ntfc);
 				var ev = OnEachClientUpdated;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateClientUpdated(that);
-					ProcessEachClientUpdated(that);
+									book?.UpdateClientUpdated(that);
+										ProcessEachClientUpdated(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.CommandError: {
+						case NotificationType.CommandError: {
 				var ntfc = (CommandError[])ntf;
 				ProcessCommandError(ntfc);
 				OnCommandError?.Invoke(this, ntfc);
 				var ev = OnEachCommandError;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachCommandError(that);
+									ProcessEachCommandError(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ComplainList: {
+						case NotificationType.ComplainList: {
 				var ntfc = (ComplainList[])ntf;
 				ProcessComplainList(ntfc);
 				OnComplainList?.Invoke(this, ntfc);
 				var ev = OnEachComplainList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachComplainList(that);
+									ProcessEachComplainList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.FileDownload: {
+						case NotificationType.FileDownload: {
 				var ntfc = (FileDownload[])ntf;
 				ProcessFileDownload(ntfc);
 				OnFileDownload?.Invoke(this, ntfc);
 				var ev = OnEachFileDownload;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachFileDownload(that);
+									ProcessEachFileDownload(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.FileInfo: {
+						case NotificationType.FileInfo: {
 				var ntfc = (FileInfo[])ntf;
 				ProcessFileInfo(ntfc);
 				OnFileInfo?.Invoke(this, ntfc);
 				var ev = OnEachFileInfo;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachFileInfo(that);
+									ProcessEachFileInfo(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.FileList: {
+						case NotificationType.FileList: {
 				var ntfc = (FileList[])ntf;
 				ProcessFileList(ntfc);
 				OnFileList?.Invoke(this, ntfc);
 				var ev = OnEachFileList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachFileList(that);
+									ProcessEachFileList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.FileListFinished: {
+						case NotificationType.FileListFinished: {
 				var ntfc = (FileListFinished[])ntf;
 				ProcessFileListFinished(ntfc);
 				OnFileListFinished?.Invoke(this, ntfc);
 				var ev = OnEachFileListFinished;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachFileListFinished(that);
+									ProcessEachFileListFinished(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.FileTransfer: {
-				var ntfc = (FileTransfer[])ntf;
-				ProcessFileTransfer(ntfc);
-				OnFileTransfer?.Invoke(this, ntfc);
-				var ev = OnEachFileTransfer;
+						case NotificationType.Filetransfer: {
+				var ntfc = (Filetransfer[])ntf;
+				ProcessFiletransfer(ntfc);
+				OnFiletransfer?.Invoke(this, ntfc);
+				var ev = OnEachFiletransfer;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachFileTransfer(that);
+									ProcessEachFiletransfer(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.FileTransferStatus: {
-				var ntfc = (FileTransferStatus[])ntf;
-				ProcessFileTransferStatus(ntfc);
-				OnFileTransferStatus?.Invoke(this, ntfc);
-				var ev = OnEachFileTransferStatus;
+						case NotificationType.FiletransferStatus: {
+				var ntfc = (FiletransferStatus[])ntf;
+				ProcessFiletransferStatus(ntfc);
+				OnFiletransferStatus?.Invoke(this, ntfc);
+				var ev = OnEachFiletransferStatus;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachFileTransferStatus(that);
+									ProcessEachFiletransferStatus(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.FileUpload: {
+						case NotificationType.FileUpload: {
 				var ntfc = (FileUpload[])ntf;
 				ProcessFileUpload(ntfc);
 				OnFileUpload?.Invoke(this, ntfc);
 				var ev = OnEachFileUpload;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachFileUpload(that);
+									ProcessEachFileUpload(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.InitIvExpand: {
+						case NotificationType.InitIvExpand: {
 				var ntfc = (InitIvExpand[])ntf;
 				ProcessInitIvExpand(ntfc);
 				OnInitIvExpand?.Invoke(this, ntfc);
 				var ev = OnEachInitIvExpand;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachInitIvExpand(that);
+									ProcessEachInitIvExpand(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.InitIvExpand2: {
+						case NotificationType.InitIvExpand2: {
 				var ntfc = (InitIvExpand2[])ntf;
 				ProcessInitIvExpand2(ntfc);
 				OnInitIvExpand2?.Invoke(this, ntfc);
 				var ev = OnEachInitIvExpand2;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachInitIvExpand2(that);
+									ProcessEachInitIvExpand2(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.InitServer: {
+						case NotificationType.InitServer: {
 				var ntfc = (InitServer[])ntf;
 				ProcessInitServer(ntfc);
 				OnInitServer?.Invoke(this, ntfc);
 				var ev = OnEachInitServer;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateInitServer(that);
-					ProcessEachInitServer(that);
+									book?.UpdateInitServer(that);
+										ProcessEachInitServer(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.OfflineMessage: {
+						case NotificationType.OfflineMessage: {
 				var ntfc = (OfflineMessage[])ntf;
 				ProcessOfflineMessage(ntfc);
 				OnOfflineMessage?.Invoke(this, ntfc);
 				var ev = OnEachOfflineMessage;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachOfflineMessage(that);
+									ProcessEachOfflineMessage(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.OfflineMessageList: {
+						case NotificationType.OfflineMessageList: {
 				var ntfc = (OfflineMessageList[])ntf;
 				ProcessOfflineMessageList(ntfc);
 				OnOfflineMessageList?.Invoke(this, ntfc);
 				var ev = OnEachOfflineMessageList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachOfflineMessageList(that);
+									ProcessEachOfflineMessageList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.PermFind: {
+						case NotificationType.PermFind: {
 				var ntfc = (PermFind[])ntf;
 				ProcessPermFind(ntfc);
 				OnPermFind?.Invoke(this, ntfc);
 				var ev = OnEachPermFind;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachPermFind(that);
+									ProcessEachPermFind(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.PermList: {
+						case NotificationType.PermList: {
 				var ntfc = (PermList[])ntf;
 				ProcessPermList(ntfc);
 				OnPermList?.Invoke(this, ntfc);
 				var ev = OnEachPermList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachPermList(that);
+									ProcessEachPermList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.PermOverview: {
+						case NotificationType.PermOverview: {
 				var ntfc = (PermOverview[])ntf;
 				ProcessPermOverview(ntfc);
 				OnPermOverview?.Invoke(this, ntfc);
 				var ev = OnEachPermOverview;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachPermOverview(that);
+									ProcessEachPermOverview(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.PluginCommand: {
+						case NotificationType.PluginCommand: {
 				var ntfc = (PluginCommand[])ntf;
 				ProcessPluginCommand(ntfc);
 				OnPluginCommand?.Invoke(this, ntfc);
 				var ev = OnEachPluginCommand;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachPluginCommand(that);
+									ProcessEachPluginCommand(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ServerConnectionInfo: {
+						case NotificationType.ServerConnectionInfo: {
 				var ntfc = (ServerConnectionInfo[])ntf;
 				ProcessServerConnectionInfo(ntfc);
 				OnServerConnectionInfo?.Invoke(this, ntfc);
 				var ev = OnEachServerConnectionInfo;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachServerConnectionInfo(that);
+									book?.UpdateServerConnectionInfo(that);
+										ProcessEachServerConnectionInfo(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ServerEdited: {
+						case NotificationType.ServerEdited: {
 				var ntfc = (ServerEdited[])ntf;
 				ProcessServerEdited(ntfc);
 				OnServerEdited?.Invoke(this, ntfc);
 				var ev = OnEachServerEdited;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateServerEdited(that);
-					ProcessEachServerEdited(that);
+									book?.UpdateServerEdited(that);
+										ProcessEachServerEdited(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ServerGroupClientList: {
+						case NotificationType.ServerGroupClientList: {
 				var ntfc = (ServerGroupClientList[])ntf;
 				ProcessServerGroupClientList(ntfc);
 				OnServerGroupClientList?.Invoke(this, ntfc);
 				var ev = OnEachServerGroupClientList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachServerGroupClientList(that);
+									ProcessEachServerGroupClientList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ServerGroupList: {
+						case NotificationType.ServerGroupList: {
 				var ntfc = (ServerGroupList[])ntf;
 				ProcessServerGroupList(ntfc);
 				OnServerGroupList?.Invoke(this, ntfc);
 				var ev = OnEachServerGroupList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					book?.UpdateServerGroupList(that);
-					ProcessEachServerGroupList(that);
+									book?.UpdateServerGroupList(that);
+										ProcessEachServerGroupList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ServerGroupPermList: {
+						case NotificationType.ServerGroupPermList: {
 				var ntfc = (ServerGroupPermList[])ntf;
 				ProcessServerGroupPermList(ntfc);
 				OnServerGroupPermList?.Invoke(this, ntfc);
 				var ev = OnEachServerGroupPermList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachServerGroupPermList(that);
+									ProcessEachServerGroupPermList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ServerGroupsByClientId: {
+						case NotificationType.ServerGroupsByClientId: {
 				var ntfc = (ServerGroupsByClientId[])ntf;
 				ProcessServerGroupsByClientId(ntfc);
 				OnServerGroupsByClientId?.Invoke(this, ntfc);
 				var ev = OnEachServerGroupsByClientId;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachServerGroupsByClientId(that);
+									ProcessEachServerGroupsByClientId(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ServerLog: {
+						case NotificationType.ServerLog: {
 				var ntfc = (ServerLog[])ntf;
 				ProcessServerLog(ntfc);
 				OnServerLog?.Invoke(this, ntfc);
 				var ev = OnEachServerLog;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachServerLog(that);
+									ProcessEachServerLog(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ServerTempPasswordList: {
+						case NotificationType.ServerTempPasswordList: {
 				var ntfc = (ServerTempPasswordList[])ntf;
 				ProcessServerTempPasswordList(ntfc);
 				OnServerTempPasswordList?.Invoke(this, ntfc);
 				var ev = OnEachServerTempPasswordList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachServerTempPasswordList(that);
+									ProcessEachServerTempPasswordList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.ServerUpdated: {
+						case NotificationType.ServerUpdated: {
 				var ntfc = (ServerUpdated[])ntf;
 				ProcessServerUpdated(ntfc);
 				OnServerUpdated?.Invoke(this, ntfc);
 				var ev = OnEachServerUpdated;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachServerUpdated(that);
+									book?.UpdateServerUpdated(that);
+										ProcessEachServerUpdated(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.TextMessage: {
+						case NotificationType.TextMessage: {
 				var ntfc = (TextMessage[])ntf;
 				ProcessTextMessage(ntfc);
 				OnTextMessage?.Invoke(this, ntfc);
 				var ev = OnEachTextMessage;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachTextMessage(that);
+									ProcessEachTextMessage(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.TokenAdd: {
+						case NotificationType.TokenAdd: {
 				var ntfc = (TokenAdd[])ntf;
 				ProcessTokenAdd(ntfc);
 				OnTokenAdd?.Invoke(this, ntfc);
 				var ev = OnEachTokenAdd;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachTokenAdd(that);
+									ProcessEachTokenAdd(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.TokenList: {
+						case NotificationType.TokenList: {
 				var ntfc = (TokenList[])ntf;
 				ProcessTokenList(ntfc);
 				OnTokenList?.Invoke(this, ntfc);
 				var ev = OnEachTokenList;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachTokenList(that);
+									ProcessEachTokenList(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.TokenUsed: {
+						case NotificationType.TokenUsed: {
 				var ntfc = (TokenUsed[])ntf;
 				ProcessTokenUsed(ntfc);
 				OnTokenUsed?.Invoke(this, ntfc);
 				var ev = OnEachTokenUsed;
 				var book = Book;
 				foreach(var that in ntfc) {
-					ProcessEachTokenUsed(that);
+									ProcessEachTokenUsed(that);
 					ev?.Invoke(this, that);
 				}
 				break;
 			}
-			
-			case NotificationType.Unknown:
+						case NotificationType.Unknown:
 			default:
 				throw Tools.UnhandledDefault(lazyNotification.NotifyType);
 			}
@@ -1162,6 +1096,8 @@ namespace TSLib.Full
 		partial void ProcessEachChannelDescriptionChanged(ChannelDescriptionChanged notifies);
 		partial void ProcessChannelEdited(ChannelEdited[] notifies);
 		partial void ProcessEachChannelEdited(ChannelEdited notifies);
+		partial void ProcessChannelEditedLow(ChannelEditedLow[] notifies);
+		partial void ProcessEachChannelEditedLow(ChannelEditedLow notifies);
 		partial void ProcessChannelGroupClientList(ChannelGroupClientList[] notifies);
 		partial void ProcessEachChannelGroupClientList(ChannelGroupClientList notifies);
 		partial void ProcessChannelGroupList(ChannelGroupList[] notifies);
@@ -1242,10 +1178,10 @@ namespace TSLib.Full
 		partial void ProcessEachFileList(FileList notifies);
 		partial void ProcessFileListFinished(FileListFinished[] notifies);
 		partial void ProcessEachFileListFinished(FileListFinished notifies);
-		partial void ProcessFileTransfer(FileTransfer[] notifies);
-		partial void ProcessEachFileTransfer(FileTransfer notifies);
-		partial void ProcessFileTransferStatus(FileTransferStatus[] notifies);
-		partial void ProcessEachFileTransferStatus(FileTransferStatus notifies);
+		partial void ProcessFiletransfer(Filetransfer[] notifies);
+		partial void ProcessEachFiletransfer(Filetransfer notifies);
+		partial void ProcessFiletransferStatus(FiletransferStatus[] notifies);
+		partial void ProcessEachFiletransferStatus(FiletransferStatus notifies);
 		partial void ProcessFileUpload(FileUpload[] notifies);
 		partial void ProcessEachFileUpload(FileUpload notifies);
 		partial void ProcessInitIvExpand(InitIvExpand[] notifies);
@@ -1292,6 +1228,5 @@ namespace TSLib.Full
 		partial void ProcessEachTokenList(TokenList notifies);
 		partial void ProcessTokenUsed(TokenUsed[] notifies);
 		partial void ProcessEachTokenUsed(TokenUsed notifies);
-		
-	}
-}
+			}
+		}

@@ -7,12 +7,13 @@ public class BookDeclarations
 		var toml = Nett.Toml.ReadFile<BookDeclarations>(file);
 
 		// transfer all optional get/set confs
+		// (newer declarations dropped the accessor block entirely -> default to public get/set)
 		foreach (var struc in toml.@struct)
 		{
 			foreach (var prop in struc.properties)
 			{
-				prop.get ??= struc.accessor.get;
-				prop.set ??= struc.accessor.set;
+				prop.get ??= struc.accessor?.get ?? true;
+				prop.set ??= struc.accessor?.set ?? true;
 			}
 		}
 
@@ -26,6 +27,7 @@ public class BookDeclarations
 		public string name { get; set; }
 		public Id[] id { get; set; }
 		public string doc { get; set; }
+		public bool? opt { get; set; }
 		public Accessor accessor { get; set; }
 		public Property[] properties { get; set; }
 	}

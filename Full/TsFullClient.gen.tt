@@ -48,11 +48,13 @@ namespace TSLib.Full
 				On<#= ntfy.name #>?.Invoke(this, ntfc);
 				var ev = OnEach<#= ntfy.name #>;
 				var book = Book;
-				foreach(var that in ntfc) {<#
+				foreach(var that in ntfc) {
+				<#
 					var bookitem = genm2b.rule.FirstOrDefault(x => x.from == ntfy.name);
 					if(bookitem != null) {
 					#>
-					book?.Update<#= ntfy.name #>(that);<# } #>
+					book?.Update<#= ntfy.name #>(that);
+					<# } #>
 					ProcessEach<#= ntfy.name #>(that);
 					ev?.Invoke(this, that);
 				}

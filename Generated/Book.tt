@@ -41,6 +41,9 @@ foreach (var struc in gen.@struct)
 			foreach(var prop in struc.properties) {
 				switch(prop.mod) {
 				case "array":
+					WriteLine($"{prop.name} = new List<{prop.type}>();");
+					break;
+				case "set":
 					WriteLine($"{prop.name} = new HashSet<{prop.type}>();");
 					break;
 				case "map":
@@ -52,20 +55,24 @@ foreach (var struc in gen.@struct)
 
 	<# foreach(var prop in struc.properties.OrderBy(x => x.name)) {
 			if (!prop.get.Value && !prop.set.Value) continue;
-		#>
-		public <#
+			string typeStr;
 			switch(prop.mod) {
 			case "array":
-				Write($"HashSet<{prop.type}>");
+				typeStr = $"List<{prop.type}>";
+				break;
+			case "set":
+				typeStr = $"HashSet<{prop.type}>";
 				break;
 			case "map":
-				Write($"Dictionary<{prop.key},{prop.type}>");
+				typeStr = $"Dictionary<{prop.key},{prop.type}>";
 				break;
 			default:
-				Write($"{prop.type}{(prop.opt == true ? "?" : "")}");
+				typeStr = $"{prop.type}{(prop.opt == true ? "?" : "")}";
 				break;
 			}
-		#> <#= prop.name #> { <#= prop.get.Value?"":"internal " #>get; <#= prop.set.Value?"":"internal " #>set; }<# } #>
+		#>
+		public <#= typeStr #> <#= prop.name #> { <#= prop.get.Value?"":"internal " #>get; <#= prop.set.Value?"":"internal " #>set; }
+		<# } #>
 	}
 <#
 }

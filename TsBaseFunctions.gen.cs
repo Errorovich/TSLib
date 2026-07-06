@@ -10,18 +10,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 using System;
 using System.Threading.Tasks;
 using TSLib.Commands;
@@ -32,85 +20,62 @@ namespace TSLib
 {
 	partial class TsBaseFunctions
 	{
-
 		/// <summary>
 		/// Sends a TS-command.
-		/// 
-		/// 
-		/// </summary>
+						/// </summary>
 		/// <param name="command">The command name.</param>
 		/// <param name="parameter">The parameters to be added to this command.
 		/// See <see cref="CommandParameter"/>, <see cref="CommandOption"/> or <see cref="CommandMultiParameter"/> for more information.</param>
-		/// 
-		/// 
-		public async Task<R<ResponseDictionary[], CommandError>> Send(string command, params ICommandPart[] parameter)
+						public async Task<R<ResponseDictionary[], CommandError>> Send(string command, params ICommandPart[] parameter)
 			=> await Send<ResponseDictionary>(new TsCommand(command, parameter));
-
 		/// <summary>
 		/// Sends a TS-command.
-		/// 
-		/// 
-		/// </summary>
+						/// </summary>
 		/// <param name="command">The command name.</param>
 		/// <param name="parameter">The parameters to be added to this command.
 		/// See <see cref="CommandParameter"/>, <see cref="CommandOption"/> or <see cref="CommandMultiParameter"/> for more information.</param>
-		/// 
-		/// <returns>Returns an enumeration of the deserialized and split up in <see cref="T"/> objects data.</returns>
-		public async Task<R<T[], CommandError>> Send<T>(string command, params ICommandPart[] parameter) where T : IResponse, new()
+						/// <returns>Returns an enumeration of the deserialized and split up in <see cref="T"/> objects data.</returns>
+				public async Task<R<T[], CommandError>> Send<T>(string command, params ICommandPart[] parameter) where T : IResponse, new()
 			=> await Send<T>(new TsCommand(command, parameter));
-
 		/// <summary>
 		/// Sends a TS-command.
-		/// 
-		/// The response (if any) is not deserialized and is discarded.
-		/// </summary>
+						/// The response (if any) is not deserialized and is discarded.
+				/// </summary>
 		/// <param name="command">The command name.</param>
 		/// <param name="parameter">The parameters to be added to this command.
 		/// See <see cref="CommandParameter"/>, <see cref="CommandOption"/> or <see cref="CommandMultiParameter"/> for more information.</param>
-		/// 
-		/// 
-		public async Task<E<CommandError>> SendVoid(string command, params ICommandPart[] parameter)
+						public async Task<E<CommandError>> SendVoid(string command, params ICommandPart[] parameter)
 			=> await Send<ResponseVoid>(new TsCommand(command, parameter));
-
 		/// <summary>
 		/// Sends a TS-command.
-		/// 
-		/// The response (if any) is not deserialized and is discarded.
-		/// </summary>
+						/// The response (if any) is not deserialized and is discarded.
+				/// </summary>
 		/// <param name="command">The command name.</param>
 		/// <param name="parameter">The parameters to be added to this command.
 		/// See <see cref="CommandParameter"/>, <see cref="CommandOption"/> or <see cref="CommandMultiParameter"/> for more information.</param>
-		/// 
-		/// 
-		public async Task<E<CommandError>> SendVoid(TsCommand com)
+						public async Task<E<CommandError>> SendVoid(TsCommand com)
 			=> await Send<ResponseVoid>(com);
-
 		/// <summary>
 		/// Sends a TS-command.
-		/// This will send a normal query-command when connected via query client. When connected as a full client the first specified notification is used as the response.
-		/// 
-		/// </summary>
+				/// This will send a normal query-command when connected via query client. When connected as a full client the first specified notification is used as the response.
+						/// </summary>
 		/// <param name="command">The command name.</param>
 		/// <param name="parameter">The parameters to be added to this command.
 		/// See <see cref="CommandParameter"/>, <see cref="CommandOption"/> or <see cref="CommandMultiParameter"/> for more information.</param>
-		/// <param name="type">The notification type to wait for and serialize to when called from the full client.</param>
-		/// 
-		public async Task<R<ResponseDictionary[], CommandError>> SendHybrid(string command, NotificationType type, params ICommandPart[] parameter)
+				/// <param name="type">The notification type to wait for and serialize to when called from the full client.</param>
+						public async Task<R<ResponseDictionary[], CommandError>> SendHybrid(string command, NotificationType type, params ICommandPart[] parameter)
 			=> await SendHybrid<ResponseDictionary>(new TsCommand(command, parameter), type);
-
 		/// <summary>
 		/// Sends a TS-command.
-		/// This will send a normal query-command when connected via query client. When connected as a full client the first specified notification is used as the response.
-		/// 
-		/// </summary>
+				/// This will send a normal query-command when connected via query client. When connected as a full client the first specified notification is used as the response.
+						/// </summary>
 		/// <param name="command">The command name.</param>
 		/// <param name="parameter">The parameters to be added to this command.
 		/// See <see cref="CommandParameter"/>, <see cref="CommandOption"/> or <see cref="CommandMultiParameter"/> for more information.</param>
-		/// <param name="type">The notification type to wait for and serialize to when called from the full client.</param>
-		/// <returns>Returns an enumeration of the deserialized and split up in <see cref="T"/> objects data.</returns>
-		public async Task<R<T[], CommandError>> SendHybrid<T>(string command, NotificationType type, params ICommandPart[] parameter) where T : class, IResponse, new()
+				/// <param name="type">The notification type to wait for and serialize to when called from the full client.</param>
+						/// <returns>Returns an enumeration of the deserialized and split up in <see cref="T"/> objects data.</returns>
+				public async Task<R<T[], CommandError>> SendHybrid<T>(string command, NotificationType type, params ICommandPart[] parameter) where T : class, IResponse, new()
 			=> await SendHybrid<T>(new TsCommand(command, parameter), type);
-
 
 #pragma warning disable CS0067
 
@@ -138,7 +103,6 @@ namespace TSLib
 		public abstract event EventHandler<TextMessage>? OnEachTextMessage;
 		public abstract event NotifyEventHandler<TokenUsed>? OnTokenUsed;
 		public abstract event EventHandler<TokenUsed>? OnEachTokenUsed;
-
 #pragma warning restore CS0067
 	}
 }

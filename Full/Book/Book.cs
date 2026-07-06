@@ -83,7 +83,12 @@ namespace TSLib.Full.Book
 
 		private void SetServerGroup(ServerGroup serverGroup, ServerGroupId id)
 		{
-			Groups[id] = serverGroup;
+			ServerGroups[id] = serverGroup;
+		}
+
+		private void SetChannelGroup(ChannelGroup channelGroup, ChannelGroupId id)
+		{
+			ChannelGroups[id] = channelGroup;
 		}
 
 		private Server GetServer()
@@ -91,11 +96,60 @@ namespace TSLib.Full.Book
 			return Server;
 		}
 
+		// Optional/connection sub-objects are created on demand: the server only sends
+		// their fields on explicit request, so a missing object is not a protocol error.
+		private OptionalChannelData? GetOptionalChannelData(ChannelId id)
+		{
+			var channel = GetChannel(id);
+			if (channel == null)
+				return null;
+			return channel.OptionalData ??= new OptionalChannelData();
+		}
+
+		private void RemoveOptionalChannelData(ChannelId id)
+		{
+			var channel = GetChannel(id);
+			if (channel != null)
+				channel.OptionalData = null;
+		}
+
+		private OptionalClientData? GetOptionalClientData(ClientId id)
+		{
+			var client = GetClient(id);
+			if (client == null)
+				return null;
+			return client.OptionalData ??= new OptionalClientData();
+		}
+
+		private ConnectionClientData? GetConnectionClientData(ClientId id)
+		{
+			var client = GetClient(id);
+			if (client == null)
+				return null;
+			return client.ConnectionData ??= new ConnectionClientData();
+		}
+
+		private OptionalServerData GetOptionalServerData()
+		{
+			return Server.OptionalData ??= new OptionalServerData();
+		}
+
+		private void RemoveOptionalServerData()
+		{
+			Server.OptionalData = null;
+		}
+
+		private ConnectionServerData GetConnectionServerData()
+		{
+			return Server.ConnectionData ??= new ConnectionServerData();
+		}
+
 		public void Reset()
 		{
 			Channels.Clear();
 			Clients.Clear();
-			Groups.Clear();
+			ServerGroups.Clear();
+			ChannelGroups.Clear();
 			OwnClient = ClientId.Null;
 			Server = new Server();
 		}
@@ -115,6 +169,24 @@ namespace TSLib.Full.Book
 				}
 			}
 		}
+
+		// Set channel subscribed when the current client is moved (called before the
+		// book Channel property is updated, so the target channel comes from the message)
+		private void SubscribeChannelFun(ClientMoved msg)
+		{
+			if (msg.ClientId != OwnClient)
+				return;
+			var channel = GetChannel(msg.TargetChannelId);
+			if (channel != null)
+				channel.Subscribed = true;
+		}
+
+		// Default codec is opus voice (server omits the field in notifychannelcreated)
+		private static Codec ChannelCodecCcFun(ChannelCreated msg) => msg.Codec ?? Codec.OpusVoice;
+
+		// Declarations mark VersionSign as reset-to-unknown on ClientUpdated ("Some(None)");
+		// the C# codegen skips null assignments, so this is effectively "leave unchanged".
+		private static string? ReturnSomeNone(ClientUpdated msg) => null;
 
 		// Manual move functions
 

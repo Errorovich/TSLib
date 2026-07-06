@@ -74,14 +74,22 @@ namespace TSLib
 #>
 		/// <summary>
 		/// Sends a TS-command.
-		/// <# if(isHybrid) { #>This will send a normal query-command when connected via query client. When connected as a full client the first specified notification is used as the response.<# } #>
-		/// <# if(hasReturn == "void") { #>The response (if any) is not deserialized and is discarded.<# } #>
+		<# if(isHybrid) { #>
+		/// This will send a normal query-command when connected via query client. When connected as a full client the first specified notification is used as the response.
+		<# } #>
+		<# if(hasReturn == "void") { #>
+		/// The response (if any) is not deserialized and is discarded.
+		<# } #>
 		/// </summary>
 		/// <param name="command">The command name.</param>
 		/// <param name="parameter">The parameters to be added to this command.
 		/// See <see cref="CommandParameter"/>, <see cref="CommandOption"/> or <see cref="CommandMultiParameter"/> for more information.</param>
-		/// <# if(isHybrid) { #><param name="type">The notification type to wait for and serialize to when called from the full client.</param><# } #>
-		/// <# if(hasReturn == "T") { #><returns>Returns an enumeration of the deserialized and split up in <see cref="T"/> objects data.</returns><# } #>
+		<# if(isHybrid) { #>
+		/// <param name="type">The notification type to wait for and serialize to when called from the full client.</param>
+		<# } #>
+		<# if(hasReturn == "T") { #>
+		/// <returns>Returns an enumeration of the deserialized and split up in <see cref="T"/> objects data.</returns>
+		<# } #>
 		public async <#= retType #> <#= callTitle #><#= genMod #>(<#= callParam #>)<#= genSuffix #>
 			=> await <#= fwdTitle #><#= fwdModInfix #>(<#= fwdParam #>);
 <# }} #>
