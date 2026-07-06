@@ -35,10 +35,10 @@ namespace TSLib
 	{
 		// ReSharper disable InconsistentNaming, UnusedMember.Global
 		undefined,
-		<# foreach (var line in data.Skip(1)) { #>
+<# foreach (var line in data.Skip(1)) { #>
 		/// <summary><#= line[1] #></summary>
 		<#= line[0] #>,
-		<# } #>
+<# } #>
 		// ReSharper restore InconsistentNaming, UnusedMember.Global
 	}
 
@@ -49,9 +49,9 @@ namespace TSLib
 			switch (permid)
 			{
 			case TsPermission.undefined: return "Undefined permission";
-			<# foreach (var line in data.Skip(1)) { #>
+<# foreach (var line in data.Skip(1)) { #>
 			case TsPermission.<#= line[0] #>: return "<#= line[1] #>";
-			<# } #>
+<# } #>
 			default: throw Tools.UnhandledDefault(permid);
 			}
 		}

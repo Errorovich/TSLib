@@ -124,7 +124,7 @@ foreach(var msg in gen.GetOrderedMsg())
 {
 	//if(!msg.s2c.Value) continue;
 #>
-	<#
+<#
 		bool isNotify = msg.notify != null;
 		bool isResponse = msg.response.Value;
 		string ifaces = (isNotify && isResponse) ? " : INotification, IResponse"
@@ -140,12 +140,12 @@ foreach(var msg in gen.GetOrderedMsg())
 <#
 	foreach (var (genField, optional) in msg.attributes.Select(f => gen.GetField(f)).OrderBy(x => x.fld.pretty)) { #>
 		public <#= genField.TypeFin(optional) #> <#= genField.pretty #> { get; set; }
-		<# } #>
+<# } #>
 		#pragma warning restore CS8618
 
 		public void SetField(string name, ReadOnlySpan<byte> value, Deserializer ser)
 		{
-		<#
+<#
 		if (msg.attributes.Length > 0) { #>
 			switch(name)
 			{
@@ -153,7 +153,7 @@ foreach(var msg in gen.GetOrderedMsg())
 		foreach (var (genField, optional) in msg.attributes.Select(f => gen.GetField(f)).OrderBy(x => x.fld.ts)) {
 #>
 			case "<#= genField.ts #>": <#= GenerateDeserializer(genField) #> break;
-			<#
+<#
 			}
 #>
 			<#= isResponse ? ("case \"return_code\": " + GenerateDeserializer(gen.GetField("return_code").fld) + " break;") : "" #>
@@ -164,7 +164,7 @@ foreach(var msg in gen.GetOrderedMsg())
 
 		public void Expand(IMessage[] to, IEnumerable<string> flds)
 		{
-		<#
+<#
 		if (msg.attributes.Length > 0) { #>
 			var toc = (<#= msg.name #>[])to;
 			foreach (var fld in flds)
@@ -175,7 +175,7 @@ foreach(var msg in gen.GetOrderedMsg())
 		foreach (var (genField, optional) in msg.attributes.Select(f => gen.GetField(f)).OrderBy(x => x.fld.ts)) {
 #>
 				case "<#= genField.ts #>": foreach(var toi in toc) { toi.<#= genField.pretty #> = <#= genField.pretty #>; } break;
-				<#
+<#
 				}
 #>
 				}
@@ -188,12 +188,12 @@ foreach(var msg in gen.GetOrderedMsg())
 	public enum NotificationType
 	{
 		Unknown,
-		<#
+<#
 	foreach(var ntfy in gen.NotifiesSorted) {
 		/*if(!ntfy.s2c.Value) continue;*/ #>
 		///<summary><#= ntfy.s2c.Value ? "[S2C] " : "" #><#= ntfy.c2s.Value ? "[C2S] " : "" #>ntfy:<#= ntfy.notify #></summary>
 		<#= ntfy.name #>,
-		<#
+<#
 	}
 #>
 	}
@@ -204,12 +204,12 @@ foreach(var msg in gen.GetOrderedMsg())
 		{
 			switch(name)
 			{
-			<#
+<#
 	// several messages may share one notify string (e.g. ChannelEdited/ChannelEditedLow);
 	// keep the first (attribute-superset) message per notify
 	foreach(var ntfy in gen.NotifiesSorted.Where(x => x.s2c.Value).GroupBy(x => x.notify).Select(x => x.First())) {#>
 			case "<#= ntfy.notify #>": return NotificationType.<#= ntfy.name #>;
-			<#
+<#
 	}
 #>
 			default: return NotificationType.Unknown;
@@ -220,10 +220,10 @@ foreach(var msg in gen.GetOrderedMsg())
 		{
 			switch(name)
 			{
-			<#
+<#
 	foreach(var ntfy in gen.NotifiesSorted.Where(x => x.c2s.Value).GroupBy(x => x.notify).Select(x => x.First())) {#>
 			case "<#= ntfy.notify #>": return NotificationType.<#= ntfy.name #>;
-			<#
+<#
 	}
 #>
 			default: return NotificationType.Unknown;
@@ -234,13 +234,13 @@ foreach(var msg in gen.GetOrderedMsg())
 		{
 			switch(name)
 			{
-			<#
+<#
 	foreach(var ntfy in gen.NotifiesSorted)
 	{
 		/*if(!ntfy.s2c.Value) continue;*/
 #>
 			case NotificationType.<#= ntfy.name #>: return new <#= ntfy.name #>();
-			<#
+<#
 	}
 #>
 			case NotificationType.Unknown:
@@ -252,13 +252,13 @@ foreach(var msg in gen.GetOrderedMsg())
 		{
 			switch(name)
 			{
-			<#
+<#
 	foreach(var ntfy in gen.NotifiesSorted)
 	{
 		/*if(!ntfy.s2c.Value) continue;*/
 #>
 			case NotificationType.<#= ntfy.name #>: { var arr = new <#= ntfy.name #>[len]; for (int i = 0; i < len; i++) arr[i] = new <#= ntfy.name #>(); return arr; }
-			<#
+<#
 	}
 #>
 			case NotificationType.Unknown:

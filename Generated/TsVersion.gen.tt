@@ -47,7 +47,7 @@ namespace TSLib
 	partial class TsVersionSigned
 	{
 		// ReSharper disable InconsistentNaming, UnusedMember.Global
-		<#
+<#
 		var header = data[0];
 		int ichan = Array.IndexOf(header, "channel");
 		int iname = Array.IndexOf(header, "version");
@@ -67,7 +67,7 @@ namespace TSLib
 			var build = VersionPattern.Match(line[iname]).Groups[2].Value;
 		#>
 		public static TsVersionSigned <#= fldName #> { get; } = new TsVersionSigned("<#= line[iname] #>", "<#= line[iplat] #>", ClientPlatform.<#= ver.enu #>, <#= build #>UL, "<#= line[ihash] #>");
-		<# } #>
+<# } #>
 		// ReSharper restore InconsistentNaming, UnusedMember.Global
 	}
 }

@@ -36,7 +36,8 @@ foreach (var struc in gen.@struct)
 		public <#= struc.name #>()
 		#pragma warning restore CS8618
 		{
-			<# ClearIndent();
+<#
+			ClearIndent();
 			PushIndent("\t\t\t");
 			foreach(var prop in struc.properties) {
 				switch(prop.mod) {
@@ -50,10 +51,12 @@ foreach (var struc in gen.@struct)
 					WriteLine($"{prop.name} = new Dictionary<{prop.key},{prop.type}>();");
 					break;
 				}
-			} #>
+			}
+			ClearIndent();
+#>
 		}
 
-	<# foreach(var prop in struc.properties.OrderBy(x => x.name)) {
+<# foreach(var prop in struc.properties.OrderBy(x => x.name)) {
 			if (!prop.get.Value && !prop.set.Value) continue;
 			string typeStr;
 			switch(prop.mod) {
@@ -72,7 +75,7 @@ foreach (var struc in gen.@struct)
 			}
 		#>
 		public <#= typeStr #> <#= prop.name #> { <#= prop.get.Value?"":"internal " #>get; <#= prop.set.Value?"":"internal " #>set; }
-		<# } #>
+<# } #>
 	}
 <#
 }

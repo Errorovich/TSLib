@@ -19,10 +19,10 @@ namespace TSLib
 	public enum TsErrorCode : uint
 	{
 		// ReSharper disable InconsistentNaming, UnusedMember.Global
-		<# foreach (var line in errors) { #>
+<# foreach (var line in errors) { #>
 		/// <summary><#= line.Doc #></summary>
 		<#= line.Name #> = <#= line.Value #>,
-		<# } #>
+<# } #>
 		/// <summary>For own custom errors</summary>
 		custom_error = 0xFFFF,
 		// ReSharper enable InconsistentNaming, UnusedMember.Global

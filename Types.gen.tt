@@ -40,7 +40,7 @@ namespace TSLib
 		public static Type[] All => new Type[] { <# foreach(var type in types) { Write($"typeof({type.alias}),"); } #> };
 	}
 
-	<# foreach(var type in types) {
+<# foreach(var type in types) {
 		var isStr = type.backing.Equals("string",StringComparison.OrdinalIgnoreCase); #>
 	[StructLayout(LayoutKind.Sequential, Pack=0)]
 	[DebuggerDisplay("{Value, nq}")]
@@ -58,23 +58,23 @@ namespace TSLib
 		public override int GetHashCode() => <#= isStr ? "Value?.GetHashCode() ?? 0" : "Value.GetHashCode()" #> ;
 		public override bool Equals(object? obj) => obj is <#= type.alias #> c && this.Equals(c);
 		public override string ToString() => Value <#= isStr ? "?? \"\"" : ".ToString()" #>;
-		<# if (isStr) { #>
+<# if (isStr) { #>
 		public bool Equals(<#= type.alias #> other) => string.Equals(Value, other.Value, StringComparison.Ordinal);
-		<# } else { #>
+<# } else { #>
 		public bool Equals(<#= type.alias #> other) => Value.Equals(other.Value);
 		public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
-		<# } #>
+<# } #>
 		public static <#= type.alias #>? TryFrom(object value) {
-			<# if (isStr) { #>
+<# if (isStr) { #>
 			if (value is string s) return new <#= type.alias #>(s);
 			return null;
-			<# } else { #>
+<# } else { #>
 			if (value is <#= type.backing #> bvalue) return new <#= type.alias #>(bvalue);
 			if (value is string s && <#= type.backing #>.TryParse(s, out var num)) return new <#= type.alias #>(num);
 			if (value is IConvertible c) return new <#= type.alias #>(c.To<#= type.backing #>(CultureInfo.InvariantCulture));
 
 			return null;
-			<# } #>
+<# } #>
 			
 		}
 
@@ -86,5 +86,5 @@ namespace TSLib
 				=> new <#= type.alias #>(<#= isStr ? "" : type.backing + ".Parse" #>(reader.ReadAsString() ?? throw new FormatException()));
 		}
 	}
-	<# } #>
+<# } #>
 }
