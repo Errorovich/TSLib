@@ -1,4 +1,4 @@
-<#@ include file="Util.ttinclude" once="true" #>
+<#@ include file="../../Util.ttinclude" once="true" #>
 <#+
 public class BookDeclarations
 {

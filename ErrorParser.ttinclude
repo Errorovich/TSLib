@@ -4,9 +4,9 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ import namespace="Microsoft.VisualBasic.FileIO" #>
 <#
-List<GenError> ParseErrors()
+// The caller resolves the path (Host.ResolvePath is relative to the main template, not this include)
+List<GenError> ParseErrors(string declFilePath)
 {
-	string declFilePath = Host.ResolvePath("../Declarations/Errors.csv");
 	var data = new List<GenError>();
 	using (TextFieldParser parser = new TextFieldParser(declFilePath))
 	{

@@ -43,34 +43,35 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ReSpeak.png" Pack="true" PackagePath="\" />
-    <None Include="Generated\BookParser.ttinclude" />
-    <None Include="Generated\ErrorParser.ttinclude" />
-    <None Include="Generated\M2BParser.ttinclude" />
-    <None Include="Generated\MessageParser.ttinclude" />
-    <None Include="Generated\Util.ttinclude" />
+    <None Include="Full\Book\BookParser.ttinclude" />
+    <None Include="ErrorParser.ttinclude" />
+    <None Include="Full\Book\M2BParser.ttinclude" />
+    <None Include="Messages\MessageParser.ttinclude" />
+    <None Include="NotificationUtil.ttinclude" />
+    <None Include="Util.ttinclude" />
     <None Update="Commands\TsCommand.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TsCommand.gen.cs</LastGenOutput>
     </None>
-    <None Update="Generated\Book.tt">
+    <None Update="Full\Book\Book.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Book.cs</LastGenOutput>
+      <LastGenOutput>Book.gen.cs</LastGenOutput>
     </None>
-    <None Update="Generated\TsErrorCode.tt">
+    <None Update="TsErrorCode.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TsErrorCode.cs</LastGenOutput>
+      <LastGenOutput>TsErrorCode.gen.cs</LastGenOutput>
     </None>
-    <None Update="Generated\M2B.tt">
+    <None Update="Full\Book\M2B.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>M2B.cs</LastGenOutput>
+      <LastGenOutput>M2B.gen.cs</LastGenOutput>
     </None>
-    <None Update="Generated\Messages.tt">
+    <None Update="Messages\Messages.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Messages.cs</LastGenOutput>
+      <LastGenOutput>Messages.gen.cs</LastGenOutput>
     </None>
-    <None Update="Generated\TsPermission.tt">
+    <None Update="TsPermission.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TsPermission.cs</LastGenOutput>
+      <LastGenOutput>TsPermission.gen.cs</LastGenOutput>
     </None>
     <None Update="Full\TsFullClient.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -84,7 +85,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Types.gen.cs</LastGenOutput>
     </None>
-    <None Update="Generated\TsVersion.gen.tt">
+    <None Update="TsVersion.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TsVersion.gen.cs</LastGenOutput>
     </None>
@@ -104,32 +105,32 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>TsFullClient.gen.tt</DependentUpon>
     </Compile>
-    <Compile Update="Generated\Book.cs">
+    <Compile Update="Full\Book\Book.gen.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Book.tt</DependentUpon>
+      <DependentUpon>Book.gen.tt</DependentUpon>
     </Compile>
-    <Compile Update="Generated\TsErrorCode.cs">
+    <Compile Update="TsErrorCode.gen.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>TsErrorCode.tt</DependentUpon>
+      <DependentUpon>TsErrorCode.gen.tt</DependentUpon>
     </Compile>
-    <Compile Update="Generated\M2B.cs">
+    <Compile Update="Full\Book\M2B.gen.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>M2B.tt</DependentUpon>
+      <DependentUpon>M2B.gen.tt</DependentUpon>
     </Compile>
-    <Compile Update="Generated\Messages.cs">
+    <Compile Update="Messages\Messages.gen.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Messages.tt</DependentUpon>
+      <DependentUpon>Messages.gen.tt</DependentUpon>
     </Compile>
-    <Compile Update="Generated\TsPermission.cs">
+    <Compile Update="TsPermission.gen.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>TsPermission.tt</DependentUpon>
+      <DependentUpon>TsPermission.gen.tt</DependentUpon>
     </Compile>
-    <Compile Update="Generated\TsVersion.gen.cs">
+    <Compile Update="TsVersion.gen.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TsVersion.gen.tt</DependentUpon>

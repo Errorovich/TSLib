@@ -10,7 +10,7 @@
 
 <#@ template debug="true" hostSpecific="true" language="C#" #>
 <#@ include file="M2BParser.ttinclude" once="true" #>
-<#@ include file="MessageParser.ttinclude" once="true" #>
+<#@ include file="../../Messages/MessageParser.ttinclude" once="true" #>
 <#@ include file="BookParser.ttinclude" once="true" #>
 <#@ output extension=".cs" #>
 <#@ assembly name="System.Core" #>
@@ -18,9 +18,9 @@
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#
-var genbook = BookDeclarations.Parse(Host.ResolvePath("../Declarations/Book.toml"));
-var genmsg = Messages.Parse(Host.ResolvePath("../Declarations/Messages.toml"));
-var genm2b = M2BDeclarations.Parse(Host.ResolvePath("../Declarations/MessagesToBook.toml"), genmsg, genbook);
+var genbook = BookDeclarations.Parse(Host.ResolvePath("../../Declarations/Book.toml"));
+var genmsg = Messages.Parse(Host.ResolvePath("../../Declarations/Messages.toml"));
+var genm2b = M2BDeclarations.Parse(Host.ResolvePath("../../Declarations/MessagesToBook.toml"), genmsg, genbook);
 #>
 using TSLib.Messages;
 
