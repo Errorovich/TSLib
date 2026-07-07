@@ -21,10 +21,10 @@ using TSLib.Helper;
 using TSLib.Messages;
 
 #nullable enable
-namespace TSLib.Query
+namespace TSLib.Query;
+
+partial class TsQueryClient
 {
-	partial class TsQueryClient
-	{
 <#
 		var genbook = BookDeclarations.Parse(Host.ResolvePath("../Declarations/Book.toml"));
 		var genmsg = Messages.Parse(Host.ResolvePath("../Declarations/Messages.toml"));
@@ -33,33 +33,32 @@ namespace TSLib.Query
 		GenNtfyDecls(OnlyS2C(genmsg.NotifiesSorted).Where(ntfy => sharedNotifications.Contains(ntfy.name)));
 		#>
 
-		private void InvokeEvent(LazyNotification lazyNotification)
+	private void InvokeEvent(LazyNotification lazyNotification)
+	{
+		var ntf = lazyNotification.Notifications;
+		switch (lazyNotification.NotifyType)
 		{
-			var ntf = lazyNotification.Notifications;
-			switch (lazyNotification.NotifyType)
-			{
 <#
 			foreach(var ntfy in OnlyS2C(genmsg.NotifiesSorted))
 			{
 				if(!sharedNotifications.Contains(ntfy.name)) continue;
 			#>
-			case NotificationType.<#= ntfy.name #>: {
-				var ntfc = (<#=ntfy.name #>[])ntf;
-				On<#= ntfy.name #>?.Invoke(this, ntfc);
-				var ev = OnEach<#= ntfy.name #>;
-				foreach(var that in ntfc) {
-					ev?.Invoke(this, that);
-				}
-				break;
+		case NotificationType.<#= ntfy.name #>: {
+			var ntfc = (<#=ntfy.name #>[])ntf;
+			On<#= ntfy.name #>?.Invoke(this, ntfc);
+			var ev = OnEach<#= ntfy.name #>;
+			foreach(var that in ntfc) {
+				ev?.Invoke(this, that);
 			}
+			break;
+		}
 <#
 			}
 			#>
-			case NotificationType.CommandError: break;
-			case NotificationType.Unknown:
-			default:
-				throw Tools.UnhandledDefault(lazyNotification.NotifyType);
-			}
+		case NotificationType.CommandError: break;
+		case NotificationType.Unknown:
+		default:
+			throw Tools.UnhandledDefault(lazyNotification.NotifyType);
 		}
 	}
 }

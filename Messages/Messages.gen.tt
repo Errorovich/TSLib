@@ -24,8 +24,8 @@ using TSLib.Helper;
 <#= ConversionSet #>
 
 #nullable enable
-namespace TSLib.Messages
-{
+namespace TSLib.Messages;
+
 <#
 var gen = Messages.Parse(Host.ResolvePath("../Declarations/Messages.toml"));
 
@@ -132,138 +132,137 @@ foreach(var msg in gen.GetOrderedMsg())
 			: isResponse ? " : IResponse"
 			: "";
 	#>
-	public sealed partial class <#= msg.name #><#= ifaces #>
-	{
-		#pragma warning disable CS8618
-		<#= isNotify ? "public NotificationType NotifyType { get; } = NotificationType." + msg.name + ";" : "" #>
-		<#= isResponse ? "public string? ReturnCode { get; set; }" : "" #>
+public sealed partial class <#= msg.name #><#= ifaces #>
+{
+	#pragma warning disable CS8618
+	<#= isNotify ? "public NotificationType NotifyType { get; } = NotificationType." + msg.name + ";" : "" #>
+	<#= isResponse ? "public string? ReturnCode { get; set; }" : "" #>
 <#
 	foreach (var (genField, optional) in msg.attributes.Select(f => gen.GetField(f)).OrderBy(x => x.fld.pretty)) { #>
-		public <#= genField.TypeFin(optional) #> <#= genField.pretty #> { get; set; }
+	public <#= genField.TypeFin(optional) #> <#= genField.pretty #> { get; set; }
 <# } #>
-		#pragma warning restore CS8618
+	#pragma warning restore CS8618
 
-		public void SetField(string name, ReadOnlySpan<byte> value, Deserializer ser)
-		{
-<#
-		if (msg.attributes.Length > 0) { #>
-			switch(name)
-			{
-<#
-		foreach (var (genField, optional) in msg.attributes.Select(f => gen.GetField(f)).OrderBy(x => x.fld.ts)) {
-#>
-			case "<#= genField.ts #>": <#= GenerateDeserializer(genField) #> break;
-<#
-			}
-#>
-			<#= isResponse ? ("case \"return_code\": " + GenerateDeserializer(gen.GetField("return_code").fld) + " break;") : "" #>
-			}
-<#
-			} #>
-		}
-
-		public void Expand(IMessage[] to, IEnumerable<string> flds)
-		{
-<#
-		if (msg.attributes.Length > 0) { #>
-			var toc = (<#= msg.name #>[])to;
-			foreach (var fld in flds)
-			{
-				switch(fld)
-				{
-<#
-		foreach (var (genField, optional) in msg.attributes.Select(f => gen.GetField(f)).OrderBy(x => x.fld.ts)) {
-#>
-				case "<#= genField.ts #>": foreach(var toi in toc) { toi.<#= genField.pretty #> = <#= genField.pretty #>; } break;
-<#
-				}
-#>
-				}
-			}
-<#
-			} #>
-		}
-	}
-<# } #>
-	public enum NotificationType
+	public void SetField(string name, ReadOnlySpan<byte> value, Deserializer ser)
 	{
-		Unknown,
+<#
+		if (msg.attributes.Length > 0) { #>
+		switch(name)
+		{
+<#
+		foreach (var (genField, optional) in msg.attributes.Select(f => gen.GetField(f)).OrderBy(x => x.fld.ts)) {
+#>
+		case "<#= genField.ts #>": <#= GenerateDeserializer(genField) #> break;
+<#
+			}
+#>
+		<#= isResponse ? ("case \"return_code\": " + GenerateDeserializer(gen.GetField("return_code").fld) + " break;") : "" #>
+		}
+<#
+			} #>
+	}
+
+	public void Expand(IMessage[] to, IEnumerable<string> flds)
+	{
+<#
+		if (msg.attributes.Length > 0) { #>
+		var toc = (<#= msg.name #>[])to;
+		foreach (var fld in flds)
+		{
+			switch(fld)
+			{
+<#
+		foreach (var (genField, optional) in msg.attributes.Select(f => gen.GetField(f)).OrderBy(x => x.fld.ts)) {
+#>
+			case "<#= genField.ts #>": foreach(var toi in toc) { toi.<#= genField.pretty #> = <#= genField.pretty #>; } break;
+<#
+				}
+#>
+			}
+		}
+<#
+			} #>
+	}
+}
+<# } #>
+public enum NotificationType
+{
+	Unknown,
 <#
 	foreach(var ntfy in gen.NotifiesSorted) {
 		/*if(!ntfy.s2c.Value) continue;*/ #>
-		///<summary><#= ntfy.s2c.Value ? "[S2C] " : "" #><#= ntfy.c2s.Value ? "[C2S] " : "" #>ntfy:<#= ntfy.notify #></summary>
-		<#= ntfy.name #>,
+	///<summary><#= ntfy.s2c.Value ? "[S2C] " : "" #><#= ntfy.c2s.Value ? "[C2S] " : "" #>ntfy:<#= ntfy.notify #></summary>
+	<#= ntfy.name #>,
 <#
 	}
 #>
-	}
+}
 
-	public static class MessageHelper
+public static class MessageHelper
+{
+	public static NotificationType GetToClientNotificationType(string name)
 	{
-		public static NotificationType GetToClientNotificationType(string name)
+		switch(name)
 		{
-			switch(name)
-			{
 <#
 	// several messages may share one notify string (e.g. ChannelEdited/ChannelEditedLow);
 	// keep the first (attribute-superset) message per notify
 	foreach(var ntfy in gen.NotifiesSorted.Where(x => x.s2c.Value).GroupBy(x => x.notify).Select(x => x.First())) {#>
-			case "<#= ntfy.notify #>": return NotificationType.<#= ntfy.name #>;
+		case "<#= ntfy.notify #>": return NotificationType.<#= ntfy.name #>;
 <#
 	}
 #>
-			default: return NotificationType.Unknown;
-			}
+		default: return NotificationType.Unknown;
 		}
+	}
 
-		public static NotificationType GetToServerNotificationType(string name)
+	public static NotificationType GetToServerNotificationType(string name)
+	{
+		switch(name)
 		{
-			switch(name)
-			{
 <#
 	foreach(var ntfy in gen.NotifiesSorted.Where(x => x.c2s.Value).GroupBy(x => x.notify).Select(x => x.First())) {#>
-			case "<#= ntfy.notify #>": return NotificationType.<#= ntfy.name #>;
+		case "<#= ntfy.notify #>": return NotificationType.<#= ntfy.name #>;
 <#
 	}
 #>
-			default: return NotificationType.Unknown;
-			}
+		default: return NotificationType.Unknown;
 		}
+	}
 
-		public static INotification GenerateNotificationType(NotificationType name)
+	public static INotification GenerateNotificationType(NotificationType name)
+	{
+		switch(name)
 		{
-			switch(name)
-			{
 <#
 	foreach(var ntfy in gen.NotifiesSorted)
 	{
 		/*if(!ntfy.s2c.Value) continue;*/
 #>
-			case NotificationType.<#= ntfy.name #>: return new <#= ntfy.name #>();
+		case NotificationType.<#= ntfy.name #>: return new <#= ntfy.name #>();
 <#
 	}
 #>
-			case NotificationType.Unknown:
-			default: throw Tools.UnhandledDefault(name);
-			}
+		case NotificationType.Unknown:
+		default: throw Tools.UnhandledDefault(name);
 		}
+	}
 
-		public static INotification[] InstatiateNotificationArray(NotificationType name, int len)
+	public static INotification[] InstatiateNotificationArray(NotificationType name, int len)
+	{
+		switch(name)
 		{
-			switch(name)
-			{
 <#
 	foreach(var ntfy in gen.NotifiesSorted)
 	{
 		/*if(!ntfy.s2c.Value) continue;*/
 #>
-			case NotificationType.<#= ntfy.name #>: { var arr = new <#= ntfy.name #>[len]; for (int i = 0; i < len; i++) arr[i] = new <#= ntfy.name #>(); return arr; }
+		case NotificationType.<#= ntfy.name #>: { var arr = new <#= ntfy.name #>[len]; for (int i = 0; i < len; i++) arr[i] = new <#= ntfy.name #>(); return arr; }
 <#
 	}
 #>
-			case NotificationType.Unknown:
-			default: throw Tools.UnhandledDefault(name);
-			}
+		case NotificationType.Unknown:
+		default: throw Tools.UnhandledDefault(name);
 		}
 	}
 }

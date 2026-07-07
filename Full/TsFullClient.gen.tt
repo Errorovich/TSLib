@@ -21,10 +21,10 @@ using TSLib.Helper;
 using TSLib.Messages;
 
 #nullable enable
-namespace TSLib.Full
+namespace TSLib.Full;
+
+partial class TsFullClient
 {
-	partial class TsFullClient
-	{
 <#
 		var genbook = BookDeclarations.Parse(Host.ResolvePath("../Declarations/Book.toml"));
 		var genmsg = Messages.Parse(Host.ResolvePath("../Declarations/Messages.toml"));
@@ -33,50 +33,49 @@ namespace TSLib.Full
 		GenNtfyDecls(OnlyS2C(genmsg.NotifiesSorted));
 		#>
 
-		private void InvokeEvent(LazyNotification lazyNotification)
+	private void InvokeEvent(LazyNotification lazyNotification)
+	{
+		var ntf = lazyNotification.Notifications;
+		switch (lazyNotification.NotifyType)
 		{
-			var ntf = lazyNotification.Notifications;
-			switch (lazyNotification.NotifyType)
-			{
 <#
 			foreach(var ntfy in OnlyS2C(genmsg.NotifiesSorted))
 			{
 			#>
-			case NotificationType.<#= ntfy.name #>: {
-				var ntfc = (<#=ntfy.name #>[])ntf;
-				Process<#= ntfy.name #>(ntfc);
-				On<#= ntfy.name #>?.Invoke(this, ntfc);
-				var ev = OnEach<#= ntfy.name #>;
-				var book = Book;
-				foreach(var that in ntfc) {
+		case NotificationType.<#= ntfy.name #>: {
+			var ntfc = (<#=ntfy.name #>[])ntf;
+			Process<#= ntfy.name #>(ntfc);
+			On<#= ntfy.name #>?.Invoke(this, ntfc);
+			var ev = OnEach<#= ntfy.name #>;
+			var book = Book;
+			foreach(var that in ntfc) {
 <#
 					var bookitem = genm2b.rule.FirstOrDefault(x => x.from == ntfy.name);
 					if(bookitem != null) {
 					#>
-					book?.Update<#= ntfy.name #>(that);
+				book?.Update<#= ntfy.name #>(that);
 <# } #>
-					ProcessEach<#= ntfy.name #>(that);
-					ev?.Invoke(this, that);
-				}
-				break;
+				ProcessEach<#= ntfy.name #>(that);
+				ev?.Invoke(this, that);
 			}
+			break;
+		}
 <#
 			}
 			#>
-			case NotificationType.Unknown:
-			default:
-				throw Tools.UnhandledDefault(lazyNotification.NotifyType);
-			}
+		case NotificationType.Unknown:
+		default:
+			throw Tools.UnhandledDefault(lazyNotification.NotifyType);
 		}
+	}
 
 <#
-		PushIndent("\t\t");
+		PushIndent("\t");
 		foreach(var ntfy in OnlyS2C(genmsg.NotifiesSorted))
 		{
 			WriteLine($"partial void Process{ntfy.name}({ntfy.name}[] notifies);");
-			WriteLine($"partial void ProcessEach{ntfy.name}({ntfy.name} notifies);");
+			WriteLine($"partial void ProcessEach{ntfy.name}({ntfy.name} notify);");
 		}
 		PopIndent();
 #>
-	}
 }

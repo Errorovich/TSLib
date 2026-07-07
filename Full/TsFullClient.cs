@@ -263,14 +263,14 @@ public sealed partial class TsFullClient : TsBaseFunctions, IAudioActiveProducer
 
 	// Local event processing
 
-	async partial void ProcessEachInitIvExpand(InitIvExpand initIvExpand)
+	async partial void ProcessEachInitIvExpand(InitIvExpand notify)
 	{
 		var ctx = context;
 		if (ctx is null) throw new InvalidOperationException("context should be set");
 
 		ctx.PacketHandler.ReceivedFinalInitAck();
 
-		var result = ctx.TsCrypt.CryptoInit(initIvExpand.Alpha, initIvExpand.Beta, initIvExpand.Omega);
+		var result = ctx.TsCrypt.CryptoInit(notify.Alpha, notify.Beta, notify.Omega);
 		if (!result)
 		{
 			ChangeState(ctx, TsClientStatus.Disconnected, CommandError.Custom($"Failed to calculate shared secret: {result.Error}"));
@@ -280,7 +280,7 @@ public sealed partial class TsFullClient : TsBaseFunctions, IAudioActiveProducer
 		await DefaultClientInit(ctx);
 	}
 
-	async partial void ProcessEachInitIvExpand2(InitIvExpand2 initIvExpand2)
+	async partial void ProcessEachInitIvExpand2(InitIvExpand2 notify)
 	{
 		var ctx = context;
 		if (ctx is null) throw new InvalidOperationException("context should be set");
@@ -292,13 +292,13 @@ public sealed partial class TsFullClient : TsBaseFunctions, IAudioActiveProducer
 		var ekBase64 = Convert.ToBase64String(publicKey);
 		var toSign = new byte[86];
 		Array.Copy(publicKey, 0, toSign, 0, 32);
-		var beta = Convert.FromBase64String(initIvExpand2.Beta);
+		var beta = Convert.FromBase64String(notify.Beta);
 		Array.Copy(beta, 0, toSign, 32, 54);
 		var sign = TsCrypt.Sign(ctx.ConnectionDataFull.Identity.PrivateKey, toSign);
 		var proof = Convert.ToBase64String(sign);
 		await ClientEk(ekBase64, proof);
 
-		var result = ctx.TsCrypt.CryptoInit2(initIvExpand2.License, initIvExpand2.Omega, initIvExpand2.Proof, initIvExpand2.Beta, privateKey);
+		var result = ctx.TsCrypt.CryptoInit2(notify.License, notify.Omega, notify.Proof, notify.Beta, privateKey);
 		if (!result)
 		{
 			ChangeState(ctx, TsClientStatus.Disconnected, CommandError.Custom($"Failed to calculate shared secret: {result.Error}"));
@@ -308,13 +308,13 @@ public sealed partial class TsFullClient : TsBaseFunctions, IAudioActiveProducer
 		await DefaultClientInit(ctx);
 	}
 
-	partial void ProcessEachInitServer(InitServer initServer)
+	partial void ProcessEachInitServer(InitServer notify)
 	{
 		var ctx = context;
 		if (ctx is null) throw new InvalidOperationException("context should be set");
 
-		ctx.PacketHandler.ClientId = initServer.ClientId;
-		var serverVersion = TsVersion.TryParse(initServer.Version, initServer.Platform);
+		ctx.PacketHandler.ClientId = notify.ClientId;
+		var serverVersion = TsVersion.TryParse(notify.Version, notify.Platform);
 		if (serverVersion != null)
 			ServerConstants = TsConst.GetByServerBuildNum(serverVersion.Build);
 
@@ -322,52 +322,52 @@ public sealed partial class TsFullClient : TsBaseFunctions, IAudioActiveProducer
 
 	}
 
-	async partial void ProcessEachPluginCommand(PluginCommand cmd)
+	async partial void ProcessEachPluginCommand(PluginCommand notify)
 	{
-		if (cmd.Name == "cliententerview" && cmd.Data == "version")
+		if (notify.Name == "cliententerview" && notify.Data == "version")
 			await SendPluginCommand("cliententerview", "TAB", PluginTargetMode.Server);
 	}
 
-	partial void ProcessEachCommandError(CommandError error)
+	partial void ProcessEachCommandError(CommandError notify)
 	{
 		var ctx = context;
 		if (ctx is null) throw new InvalidOperationException("context should be set");
 
 		if (status == TsClientStatus.Connecting)
-			ChangeState(ctx, TsClientStatus.Disconnected, error);
+			ChangeState(ctx, TsClientStatus.Disconnected, notify);
 		else
-			OnErrorEvent?.Invoke(this, error);
+			OnErrorEvent?.Invoke(this, notify);
 	}
 
-	partial void ProcessEachClientLeftView(ClientLeftView clientLeftView)
+	partial void ProcessEachClientLeftView(ClientLeftView notify)
 	{
 		var ctx = context;
 		if (ctx is null) throw new InvalidOperationException("context should be set");
 
-		if (clientLeftView.ClientId == ctx.PacketHandler.ClientId)
+		if (notify.ClientId == ctx.PacketHandler.ClientId)
 		{
-			ctx.ExitReason = clientLeftView.Reason;
+			ctx.ExitReason = notify.Reason;
 			ChangeState(ctx, TsClientStatus.Disconnected);
 		}
 	}
 
-	async partial void ProcessEachChannelListFinished(ChannelListFinished _)
+	async partial void ProcessEachChannelListFinished(ChannelListFinished notify)
 	{
 		await ChannelSubscribeAll();
 		await PermissionList();
 	}
 
-	async partial void ProcessEachClientConnectionInfoUpdateRequest(ClientConnectionInfoUpdateRequest _)
+	async partial void ProcessEachClientConnectionInfoUpdateRequest(ClientConnectionInfoUpdateRequest notify)
 	{
 		if (context is null) throw new InvalidOperationException("context should be set");
 
 		await SendNoResponsed(context.PacketHandler.NetworkStats.GenerateStatusAnswer());
 	}
 
-	partial void ProcessPermList(PermList[] permList)
+	partial void ProcessPermList(PermList[] notifies)
 	{
-		var buildPermissions = new List<TsPermission>(permList.Length + 1) { TsPermission.undefined };
-		foreach (var perm in permList)
+		var buildPermissions = new List<TsPermission>(notifies.Length + 1) { TsPermission.undefined };
+		foreach (var perm in notifies)
 		{
 			if (!string.IsNullOrEmpty(perm.PermissionName))
 			{

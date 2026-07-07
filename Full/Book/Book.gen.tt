@@ -22,23 +22,23 @@ using System.Collections.Generic;
 <#= ConversionSet #>
 
 #nullable enable
-namespace TSLib.Full.Book
-{
+namespace TSLib.Full.Book;
+
 <#
 var gen = BookDeclarations.Parse(Host.ResolvePath("../../Declarations/Book.toml"));
 
 foreach (var struc in gen.@struct)
 {
 #>
-	public sealed partial class <#= struc.name #>
+public sealed partial class <#= struc.name #>
+{
+	#pragma warning disable CS8618
+	public <#= struc.name #>()
+	#pragma warning restore CS8618
 	{
-		#pragma warning disable CS8618
-		public <#= struc.name #>()
-		#pragma warning restore CS8618
-		{
 <#
 			ClearIndent();
-			PushIndent("\t\t\t");
+			PushIndent("\t\t");
 			foreach(var prop in struc.properties) {
 				switch(prop.mod) {
 				case "array":
@@ -54,7 +54,7 @@ foreach (var struc in gen.@struct)
 			}
 			ClearIndent();
 #>
-		}
+	}
 
 <# foreach(var prop in struc.properties.OrderBy(x => x.name)) {
 			if (!prop.get.Value && !prop.set.Value) continue;
@@ -74,10 +74,9 @@ foreach (var struc in gen.@struct)
 				break;
 			}
 		#>
-		public <#= typeStr #> <#= prop.name #> { <#= prop.get.Value?"":"internal " #>get; <#= prop.set.Value?"":"internal " #>set; }
+	public <#= typeStr #> <#= prop.name #> { <#= prop.get.Value?"":"internal " #>get; <#= prop.set.Value?"":"internal " #>set; }
 <# } #>
-	}
+}
 <#
 }
 #>
-}

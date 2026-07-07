@@ -13,18 +13,17 @@
 <#@ output extension=".cs" #>
 <# var errors = ParseErrors(Host.ResolvePath("Declarations/Errors.csv")); #>
 
-namespace TSLib
+namespace TSLib;
+
+// Source: http://forum.teamspeak.com/threads/102276-Server-query-error-id-list
+public enum TsErrorCode : uint
 {
-	// Source: http://forum.teamspeak.com/threads/102276-Server-query-error-id-list
-	public enum TsErrorCode : uint
-	{
-		// ReSharper disable InconsistentNaming, UnusedMember.Global
+	// ReSharper disable InconsistentNaming, UnusedMember.Global
 <# foreach (var line in errors) { #>
-		/// <summary><#= line.Doc #></summary>
-		<#= line.Name #> = <#= line.Value #>,
+	/// <summary><#= line.Doc #></summary>
+	<#= line.Name #> = <#= line.Value #>,
 <# } #>
-		/// <summary>For own custom errors</summary>
-		custom_error = 0xFFFF,
-		// ReSharper enable InconsistentNaming, UnusedMember.Global
-	}
+	/// <summary>For own custom errors</summary>
+	custom_error = 0xFFFF,
+	// ReSharper enable InconsistentNaming, UnusedMember.Global
 }

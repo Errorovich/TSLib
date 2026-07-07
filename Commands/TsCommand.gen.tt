@@ -26,42 +26,41 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace TSLib.Commands
+namespace TSLib.Commands;
+
+partial class TsCommand
 {
-	partial class TsCommand
-	{
 <#
 foreach (var type in types.Concat(aliasTypes)) { 
 	if (classTypes.Contains(type)) { #>
-		[DebuggerStepThrough] public TsCommand Add(string key, <#= type #> value) { if(value != null) Add(new CommandParameter(key, value)); return this; }
+	[DebuggerStepThrough] public TsCommand Add(string key, <#= type #> value) { if(value != null) Add(new CommandParameter(key, value)); return this; }
 <# } else { #>
-		[DebuggerStepThrough] public TsCommand Add(string key, <#= type #>? value) { if(value != null) return Add(key, value.Value); return this; }
-		[DebuggerStepThrough] public TsCommand Add(string key, <#= type #> value) => Add(new CommandParameter(key, value));
+	[DebuggerStepThrough] public TsCommand Add(string key, <#= type #>? value) { if(value != null) return Add(key, value.Value); return this; }
+	[DebuggerStepThrough] public TsCommand Add(string key, <#= type #> value) => Add(new CommandParameter(key, value));
 <# } #>
-		[DebuggerStepThrough] public TsCommand Add(string key, IEnumerable<<#= type #>> value) => Add(new CommandMultiParameter(key, value));
+	[DebuggerStepThrough] public TsCommand Add(string key, IEnumerable<<#= type #>> value) => Add(new CommandMultiParameter(key, value));
 <# } #>
-	}
+}
 
-	partial class CommandParameter
-	{
+partial class CommandParameter
+{
 <# foreach (var type in types.Concat(aliasTypes)) {
 	var value = aliasTypes.Contains(type) ? "value.Value" : "value";
 	#>
-		[DebuggerStepThrough] public CommandParameter(string key, <#= type #> value) { Key = key; Value = Serialize(<#= value #>); }
+	[DebuggerStepThrough] public CommandParameter(string key, <#= type #> value) { Key = key; Value = Serialize(<#= value #>); }
 <# } #>
-	}
+}
 
-	partial class CommandMultiParameter
-	{
+partial class CommandMultiParameter
+{
 <#
 foreach (var type in types.Concat(aliasTypes)) { 
 	if (aliasTypes.Contains(type)) { #>
-		[DebuggerStepThrough] public CommandMultiParameter(string key, IEnumerable<<#= type #>> value) { Key = key; Values = value.Select(v => CommandParameter.Serialize(v.Value)).ToArray(); }
+	[DebuggerStepThrough] public CommandMultiParameter(string key, IEnumerable<<#= type #>> value) { Key = key; Values = value.Select(v => CommandParameter.Serialize(v.Value)).ToArray(); }
 <# } else { #>
-		[DebuggerStepThrough] public CommandMultiParameter(string key, IEnumerable<<#= type #>> value) { Key = key; Values = value.Select(CommandParameter.Serialize).ToArray(); }
+	[DebuggerStepThrough] public CommandMultiParameter(string key, IEnumerable<<#= type #>> value) { Key = key; Values = value.Select(CommandParameter.Serialize).ToArray(); }
 <#
 	}
 }
 #>
-	}
 }

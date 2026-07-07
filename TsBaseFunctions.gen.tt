@@ -22,10 +22,10 @@ using TSLib.Commands;
 using TSLib.Messages;
 
 #nullable enable
-namespace TSLib
+namespace TSLib;
+
+partial class TsBaseFunctions
 {
-	partial class TsBaseFunctions
-	{
 <#
 	// SEND UTILITY METHODS
 
@@ -72,26 +72,26 @@ namespace TSLib
 			$"com");
 		if (isHybrid) fwdParam += ", type";
 #>
-		/// <summary>
-		/// Sends a TS-command.
+	/// <summary>
+	/// Sends a TS-command.
 <# if(isHybrid) { #>
-		/// This will send a normal query-command when connected via query client. When connected as a full client the first specified notification is used as the response.
+	/// This will send a normal query-command when connected via query client. When connected as a full client the first specified notification is used as the response.
 <# } #>
 <# if(hasReturn == "void") { #>
-		/// The response (if any) is not deserialized and is discarded.
+	/// The response (if any) is not deserialized and is discarded.
 <# } #>
-		/// </summary>
-		/// <param name="command">The command name.</param>
-		/// <param name="parameter">The parameters to be added to this command.
-		/// See <see cref="CommandParameter"/>, <see cref="CommandOption"/> or <see cref="CommandMultiParameter"/> for more information.</param>
+	/// </summary>
+	/// <param name="command">The command name.</param>
+	/// <param name="parameter">The parameters to be added to this command.
+	/// See <see cref="CommandParameter"/>, <see cref="CommandOption"/> or <see cref="CommandMultiParameter"/> for more information.</param>
 <# if(isHybrid) { #>
-		/// <param name="type">The notification type to wait for and serialize to when called from the full client.</param>
+	/// <param name="type">The notification type to wait for and serialize to when called from the full client.</param>
 <# } #>
 <# if(hasReturn == "T") { #>
-		/// <returns>Returns an enumeration of the deserialized and split up in <see cref="T"/> objects data.</returns>
+	/// <returns>Returns an enumeration of the deserialized and split up in <see cref="T"/> objects data.</returns>
 <# } #>
-		public async <#= retType #> <#= callTitle #><#= genMod #>(<#= callParam #>)<#= genSuffix #>
-			=> await <#= fwdTitle #><#= fwdModInfix #>(<#= fwdParam #>);
+	public async <#= retType #> <#= callTitle #><#= genMod #>(<#= callParam #>)<#= genSuffix #>
+		=> await <#= fwdTitle #><#= fwdModInfix #>(<#= fwdParam #>);
 <# }} #>
 
 #pragma warning disable CS0067
@@ -102,5 +102,4 @@ namespace TSLib
 	GenNtfyDecls(OnlyS2C(genmsg.NotifiesSorted).Where(ntfy => sharedNotifications.Contains(ntfy.name)), true);
 #>
 #pragma warning restore CS0067
-	}
 }

@@ -42,11 +42,11 @@ string BuildToFld(string build)
 }
 #>
 
-namespace TSLib
+namespace TSLib;
+
+partial class TsVersionSigned
 {
-	partial class TsVersionSigned
-	{
-		// ReSharper disable InconsistentNaming, UnusedMember.Global
+	// ReSharper disable InconsistentNaming, UnusedMember.Global
 <#
 		var header = data[0];
 		int ichan = Array.IndexOf(header, "channel");
@@ -66,10 +66,9 @@ namespace TSLib
 			Regex VersionPattern = new Regex(@"([^ ])* \[Build: (\d+)\]");
 			var build = VersionPattern.Match(line[iname]).Groups[2].Value;
 		#>
-		public static TsVersionSigned <#= fldName #> { get; } = new TsVersionSigned("<#= line[iname] #>", "<#= line[iplat] #>", ClientPlatform.<#= ver.enu #>, <#= build #>UL, "<#= line[ihash] #>");
+	public static TsVersionSigned <#= fldName #> { get; } = new TsVersionSigned("<#= line[iname] #>", "<#= line[iplat] #>", ClientPlatform.<#= ver.enu #>, <#= build #>UL, "<#= line[ihash] #>");
 <# } #>
-		// ReSharper restore InconsistentNaming, UnusedMember.Global
-	}
+	// ReSharper restore InconsistentNaming, UnusedMember.Global
 }
 <#+ class Ver
 {

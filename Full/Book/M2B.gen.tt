@@ -26,21 +26,21 @@ using TSLib.Messages;
 
 <#= ConversionSet #>
 
-namespace TSLib.Full.Book
+namespace TSLib.Full.Book;
+
+public partial class Connection
 {
-	public partial class Connection
-	{
-#pragma warning disable IDE0017, CS0472 // Ignore "Object initialization can be simplified", "Something with == and null..."
+#pragma warning disable IDE0017, CS0472, CS8073 // Ignore "Object initialization can be simplified", "Something with == and null...", "The result of the expression is always ..."
 <# foreach (var ruleGroup in genm2b.rule.GroupBy(x => x.from)) {
 		var msg = genmsg.NotifiesSorted.First(x => x.name == ruleGroup.Key);
 	#>
-		public void Update<#= msg.name #>(<#= msg.name #> msg)
-		{
+	public void Update<#= msg.name #>(<#= msg.name #> msg)
+	{
 <#
 		// All emission below goes through WriteLine with explicit indent management;
 		// the indent is cleared again before control returns to literal template text.
 		ClearIndent();
-		PushIndent("\t\t\t");
+		PushIndent("\t\t");
 		// Several rules may map the same message to different book structs
 		// (e.g. ChannelEdited -> Channel + OptionalChannelData); emit each in its own scope.
 		foreach (var rule in ruleGroup) {
@@ -151,11 +151,10 @@ namespace TSLib.Full.Book
 		} /* rules */
 		ClearIndent();
 #>
-			Post<#= msg.name #>(msg);
-		}
-
-		partial void Post<#= msg.name #>(<#= msg.name #> msg);
-<# } #>
-#pragma warning restore IDE0017, CS0472
+		Post<#= msg.name #>(msg);
 	}
+
+	partial void Post<#= msg.name #>(<#= msg.name #> msg);
+<# } #>
+#pragma warning restore IDE0017, CS0472, CS8073
 }

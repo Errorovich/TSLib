@@ -28,32 +28,31 @@ using (TextFieldParser parser = new TextFieldParser(declFilePath))
 #>
 using TSLib.Helper;
 
-namespace TSLib
-{
-	// Source: https://www.tsviewer.com/index.php?page=faq&id=12&newlanguage=en
-	public enum TsPermission
-	{
-		// ReSharper disable InconsistentNaming, UnusedMember.Global
-		undefined,
-<# foreach (var line in data.Skip(1)) { #>
-		/// <summary><#= line[1] #></summary>
-		<#= line[0] #>,
-<# } #>
-		// ReSharper restore InconsistentNaming, UnusedMember.Global
-	}
+namespace TSLib;
 
-	public static partial class TsPermissionHelper
-	{
-		public static string GetDescription(TsPermission permid)
-		{
-			switch (permid)
-			{
-			case TsPermission.undefined: return "Undefined permission";
+// Source: https://www.tsviewer.com/index.php?page=faq&id=12&newlanguage=en
+public enum TsPermission
+{
+	// ReSharper disable InconsistentNaming, UnusedMember.Global
+	undefined,
 <# foreach (var line in data.Skip(1)) { #>
-			case TsPermission.<#= line[0] #>: return "<#= line[1] #>";
+	/// <summary><#= line[1] #></summary>
+	<#= line[0] #>,
 <# } #>
-			default: throw Tools.UnhandledDefault(permid);
-			}
+	// ReSharper restore InconsistentNaming, UnusedMember.Global
+}
+
+public static partial class TsPermissionHelper
+{
+	public static string GetDescription(TsPermission permid)
+	{
+		switch (permid)
+		{
+		case TsPermission.undefined: return "Undefined permission";
+<# foreach (var line in data.Skip(1)) { #>
+		case TsPermission.<#= line[0] #>: return "<#= line[1] #>";
+<# } #>
+		default: throw Tools.UnhandledDefault(permid);
 		}
 	}
 }
