@@ -11,7 +11,7 @@ using TSLib.Full;
 
 namespace TSLib
 {
-	public partial struct Uid
+	public partial record struct Uid
 	{
 		/// <summary>Unofficial type</summary>
 		public static readonly Uid Anonymous = new Uid("anonymous");
@@ -26,7 +26,7 @@ namespace TSLib
 		}
 	}
 
-	public partial struct ChannelId
+	public partial record struct ChannelId
 	{
 		public string ToPath() => $"/{Value}";
 	}
