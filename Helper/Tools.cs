@@ -24,13 +24,14 @@ namespace TSLib.Helper
 
 		// Time
 
-		public static readonly DateTime UnixTimeStart = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+		public static readonly DateTime UnixTimeStart = DateTime.UnixEpoch;
 
-		public static uint ToUnix(this DateTime dateTime) => (uint)(dateTime - UnixTimeStart).TotalSeconds;
+		// Wire-формат TS3 передаёт секунды как uint — усечение сохраняем.
+		public static uint ToUnix(this DateTime dateTime) => (uint)((DateTimeOffset)DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)).ToUnixTimeSeconds();
 
-		public static DateTime FromUnix(uint unixTimestamp) => UnixTimeStart.AddSeconds(unixTimestamp);
+		public static DateTime FromUnix(uint unixTimestamp) => DateTimeOffset.FromUnixTimeSeconds(unixTimestamp).UtcDateTime;
 
-		public static uint UnixNow => (uint)(DateTime.UtcNow - UnixTimeStart).TotalSeconds;
+		public static uint UnixNow => (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
 		public static DateTime Now => DateTime.UtcNow;
 
