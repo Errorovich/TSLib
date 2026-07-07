@@ -2,7 +2,6 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFrameworks>net9.0</TargetFrameworks>
-    <LangVersion>8.0</LangVersion>
     <RootNamespace>TSLib</RootNamespace>
     <AssemblyName>TSLib</AssemblyName>
     <Nullable>enable</Nullable>
