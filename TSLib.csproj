@@ -24,7 +24,7 @@
     <PackageLicenseExpression>OSL-3.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Splamy/TS3AudioBot</PackageProjectUrl>
     <PackageTags>TeamSpeak, TS3, TS5, Voice, Client, Query, Normal, Communication</PackageTags>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <PackageIcon>ReSpeak.png</PackageIcon>
     <!-- PackageIconUrl is deprecated, but doc says it might be good for backwards compatibility -->
     <PackageIconUrl>https://splamy.de/static/ReSpeak.png</PackageIconUrl>

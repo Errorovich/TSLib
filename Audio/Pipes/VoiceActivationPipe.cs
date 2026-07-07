@@ -10,7 +10,7 @@ namespace TSLib.Audio;
 /// </summary>
 public sealed class VoiceActivationPipe : ActivationPipe
 {
-	/// <summary>Порог срабатывания 0..1 (сопоставим с <see cref="AudioLevel.Peak"/>).</summary>
+	/// <summary>Порог срабатывания 0..1 (сопоставим с <see cref="AudioTools.Peak"/>).</summary>
 	public float Threshold { get; set; } = 0.05f;
 
 	/// <summary>Задержка деактивации в мс: сколько держать «открытым» после падения громкости ниже порога.</summary>
@@ -30,7 +30,7 @@ public sealed class VoiceActivationPipe : ActivationPipe
 	protected override bool ShouldPass(Span<byte> data, Meta? meta)
 	{
 		long now = Environment.TickCount64;
-		if (AudioLevel.Peak(data) >= Threshold)
+		if (AudioTools.Peak(data) >= Threshold)
 			openUntil = now + DeactivationDelayMs;
 
 		bool open = now <= openUntil;
