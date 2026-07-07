@@ -50,11 +50,7 @@ namespace TSLib
 			{
 				if (closeStream)
 				{
-#if NETSTANDARD2_0
-					stream.Dispose();
-#else
 					await stream.DisposeAsync();
-#endif
 				}
 				return request.Error;
 			}
@@ -86,11 +82,7 @@ namespace TSLib
 			{
 				if (closeStream)
 				{
-#if NETSTANDARD2_0
-					stream.Dispose();
-#else
 					await stream.DisposeAsync();
-#endif
 				}
 				return request.Error;
 			}
@@ -157,11 +149,7 @@ namespace TSLib
 					token.Status = TransferStatus.Done;
 					if (token.CloseStreamWhenDone)
 					{
-#if NETSTANDARD2_0
-						token.LocalStream.Dispose();
-#else
 						await token.LocalStream.DisposeAsync();
-#endif
 					}
 
 				}
@@ -233,11 +221,7 @@ namespace TSLib
 			token.Status = TransferStatus.Cancelled;
 			if (delete && token.CloseStreamWhenDone)
 			{
-#if NETSTANDARD2_0
-				token.LocalStream.Dispose();
-#else
 				await token.LocalStream.DisposeAsync();
-#endif
 			}
 		}
 

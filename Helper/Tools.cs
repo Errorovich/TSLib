@@ -16,15 +16,6 @@ namespace TSLib.Helper
 {
 	public static class Tools
 	{
-		public static bool IsLinux
-		{
-			get
-			{
-				var p = (int)Environment.OSVersion.Platform;
-				return p == 4 || p == 6 || p == 128;
-			}
-		}
-
 		public static IEnumerable<Enum> GetFlags(this Enum input) => Enum.GetValues(input.GetType()).Cast<Enum>().Where(input.HasFlag);
 
 		// Encoding
@@ -45,11 +36,9 @@ namespace TSLib.Helper
 
 		// Random
 
-		public static Random Random { get; } = new Random();
-
 		public static T PickRandom<T>(IReadOnlyList<T> collection)
 		{
-			int pick = Random.Next(0, collection.Count);
+			int pick = Random.Shared.Next(0, collection.Count);
 			return collection[pick];
 		}
 
@@ -59,9 +48,6 @@ namespace TSLib.Helper
 		public static TimeSpan Max(this TimeSpan a, TimeSpan b) => a > b ? a : b;
 
 		public static int MathMod(int x, int mod) => (x % mod + mod) % mod;
-
-		public static float Clamp(float value, float min, float max) => Math.Min(Math.Max(value, min), max);
-		public static int Clamp(int value, int min, int max) => Math.Min(Math.Max(value, min), max);
 
 		// Generic
 

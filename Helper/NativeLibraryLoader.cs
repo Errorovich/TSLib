@@ -18,14 +18,9 @@ namespace TSLib.Helper
 	{
 		private static readonly TSLib.Logging.Logger Log = TSLib.Logging.Logger.Create();
 
-#if !NETCOREAPP3_1
-		[DllImport("kernel32.dll", SetLastError = true)]
-		private static extern IntPtr LoadLibrary(string dllToLoad);
-#endif
-
 		public static bool DirectLoadLibrary(string lib, Action? dummyLoad = null)
 		{
-			if (Tools.IsLinux)
+			if (OperatingSystem.IsLinux())
 			{
 				try
 				{
@@ -42,14 +37,8 @@ namespace TSLib.Helper
 				foreach (var libPath in LibPathOptions(lib))
 				{
 					Log.Debug("Loading \"{0}\" from \"{1}\"", lib, libPath);
-#if NETCOREAPP3_1
 					if (NativeLibrary.TryLoad(libPath, out _))
 						return true;
-#else
-					var handle = LoadLibrary(libPath);
-					if (handle != IntPtr.Zero)
-						return true;
-#endif
 				}
 				Log.Error("Failed to load library \"{0}\", error: {1}", lib, Marshal.GetLastWin32Error());
 				return false;

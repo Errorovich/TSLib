@@ -13,39 +13,8 @@ namespace TSLib.Helper
 {
 	public static class SpanExtensions
 	{
-		public static string NewUtf8String(this ReadOnlySpan<byte> span)
-		{
-#if NETSTANDARD2_1 || NETCOREAPP3_1
-			return Tools.Utf8Encoder.GetString(span);
-#else
-			return Tools.Utf8Encoder.GetString(span.ToArray());
-#endif
-		}
+		public static string NewUtf8String(this ReadOnlySpan<byte> span) => Tools.Utf8Encoder.GetString(span);
 
 		public static string NewUtf8String(this Span<byte> span) => ((ReadOnlySpan<byte>)span).NewUtf8String();
-
-		public static ReadOnlySpan<byte> Trim(this ReadOnlySpan<byte> span, byte elem) => span.TrimStart(elem).TrimEnd(elem);
-
-		public static ReadOnlySpan<byte> TrimStart(this ReadOnlySpan<byte> span, byte elem)
-		{
-			int start = 0;
-			for (; start < span.Length; start++)
-			{
-				if (span[start] != elem)
-					break;
-			}
-			return span.Slice(start);
-		}
-
-		public static ReadOnlySpan<byte> TrimEnd(this ReadOnlySpan<byte> span, byte elem)
-		{
-			int end = span.Length - 1;
-			for (; end >= 0; end--)
-			{
-				if (span[end] != elem)
-					break;
-			}
-			return span.Slice(0, end + 1);
-		}
 	}
 }

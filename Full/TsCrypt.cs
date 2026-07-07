@@ -400,7 +400,7 @@ namespace TSLib.Full
 				BinaryPrimitives.WriteUInt32BigEndian(sendData.AsSpan(0), InitVersion); // initVersion
 				sendData[versionLen] = 0x00; // initType
 				BinaryPrimitives.WriteUInt32BigEndian(sendData.AsSpan(versionLen + initTypeLen), Tools.UnixNow); // 4byte timestamp
-				BinaryPrimitives.WriteInt32BigEndian(sendData.AsSpan(versionLen + initTypeLen + 4), Tools.Random.Next()); // 4byte random
+				BinaryPrimitives.WriteInt32BigEndian(sendData.AsSpan(versionLen + initTypeLen + 4), Random.Shared.Next()); // 4byte random
 				return sendData;
 			}
 
@@ -446,7 +446,7 @@ namespace TSLib.Full
 				if (data.Length != initTypeLen + 64 + 64 + 4 + 100)
 					return packetInvalidLength;
 				alphaTmp = new byte[10];
-				Tools.Random.NextBytes(alphaTmp);
+				Random.Shared.NextBytes(alphaTmp);
 				var alpha = Convert.ToBase64String(alphaTmp);
 				string initAdd = TsCommand.BuildToString("clientinitiv",
 					new ICommandPart[] {
@@ -506,8 +506,7 @@ namespace TSLib.Full
 		internal static (byte[] publicKey, byte[] privateKey) GenerateTemporaryKey()
 		{
 			var privateKey = new byte[32];
-			using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
-				rng.GetBytes(privateKey);
+			System.Security.Cryptography.RandomNumberGenerator.Fill(privateKey);
 			ScalarOperations.sc_clamp(privateKey);
 
 			GroupOperations.ge_scalarmult_base(out var A, privateKey);
@@ -708,10 +707,7 @@ namespace TSLib.Full
 			if (a1.Length < len || a2.Length < len)
 				throw new ArgumentOutOfRangeException();
 
-			int res = 0;
-			for (int i = 0; i < len; i++)
-				res |= a1[i] ^ a2[i];
-			return res == 0;
+			return System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(a1.Slice(0, len), a2.Slice(0, len));
 		}
 
 		private static void XorBinary(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b, int len, Span<byte> outBuf)
@@ -721,19 +717,10 @@ namespace TSLib.Full
 				outBuf[i] = (byte)(a[i] ^ b[i]);
 		}
 
-		private static readonly System.Security.Cryptography.SHA1Managed Sha1Hash = new System.Security.Cryptography.SHA1Managed();
-		private static readonly System.Security.Cryptography.SHA256Managed Sha256Hash = new System.Security.Cryptography.SHA256Managed();
-		private static readonly System.Security.Cryptography.SHA512Managed Sha512Hash = new System.Security.Cryptography.SHA512Managed();
-		internal static byte[] Hash1It(byte[] data, int offset = 0, int len = 0) => HashItInternal(Sha1Hash, data, offset, len);
-		internal static byte[] Hash256It(byte[] data, int offset = 0, int len = 0) => HashItInternal(Sha256Hash, data, offset, len);
-		internal static byte[] Hash512It(byte[] data, int offset = 0, int len = 0) => HashItInternal(Sha512Hash, data, offset, len);
-		private static byte[] HashItInternal(System.Security.Cryptography.HashAlgorithm hashAlgo, byte[] data, int offset = 0, int len = 0)
-		{
-			lock (hashAlgo)
-			{
-				return hashAlgo.ComputeHash(data, offset, len == 0 ? data.Length - offset : len);
-			}
-		}
+		internal static byte[] Hash1It(byte[] data, int offset = 0, int len = 0) => System.Security.Cryptography.SHA1.HashData(HashSpan(data, offset, len));
+		internal static byte[] Hash256It(byte[] data, int offset = 0, int len = 0) => System.Security.Cryptography.SHA256.HashData(HashSpan(data, offset, len));
+		internal static byte[] Hash512It(byte[] data, int offset = 0, int len = 0) => System.Security.Cryptography.SHA512.HashData(HashSpan(data, offset, len));
+		private static ReadOnlySpan<byte> HashSpan(byte[] data, int offset, int len) => data.AsSpan(offset, len == 0 ? data.Length - offset : len);
 
 		/// <summary>
 		/// Hashes a password like TeamSpeak.

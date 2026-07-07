@@ -104,21 +104,13 @@ namespace TSLib.Query
 		private async Task NetworkToPipeLoopAsync(NetworkStream stream, PipeWriter writer, CancellationToken cancellationToken = default)
 		{
 			const int minimumBufferSize = 4096;
-#if !(NETSTANDARD2_1 || NETCOREAPP3_1)
-			var dataReadBuffer = new byte[minimumBufferSize];
-#endif
 
 			while (!cancellationToken.IsCancellationRequested)
 			{
 				try
 				{
 					var mem = writer.GetMemory(minimumBufferSize);
-#if NETSTANDARD2_1 || NETCOREAPP3_1
 					int bytesRead = await stream.ReadAsync(mem, cancellationToken);
-#else
-					int bytesRead = await stream.ReadAsync(dataReadBuffer, 0, dataReadBuffer.Length, cancellationToken);
-					dataReadBuffer.CopyTo(mem);
-#endif
 					if (bytesRead == 0)
 						break;
 					writer.Advance(bytesRead);

@@ -7,6 +7,7 @@
 // You should have received a copy of the Open Software License along with this
 // program. If not, see <https://opensource.org/licenses/OSL-3.0>.
 
+using System;
 using TSLib.Full;
 using TSLib.Helper;
 
@@ -67,7 +68,7 @@ namespace TSLib
 				: base(address, logId)
 		{
 			Identity = identity;
-			VersionSign = versionSign ?? (Tools.IsLinux ? TsVersionSigned.VER_LIN_3_X_X : TsVersionSigned.VER_WIN_3_X_X);
+			VersionSign = versionSign ?? (OperatingSystem.IsLinux() ? TsVersionSigned.VER_LIN_3_X_X : TsVersionSigned.VER_WIN_3_X_X);
 			Username = username ?? "TSLibUser";
 			ServerPassword = serverPassword ?? Password.Empty;
 			DefaultChannel = defaultChannel ?? string.Empty;
