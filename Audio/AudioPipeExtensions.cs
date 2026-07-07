@@ -9,48 +9,47 @@
 
 using System;
 
-namespace TSLib.Audio
+namespace TSLib.Audio;
+
+public static class AudioPipeExtensions
 {
-	public static class AudioPipeExtensions
+	public static T Chain<T>(this IAudioActiveProducer producer, T addConsumer) where T : IAudioPassiveConsumer
 	{
-		public static T Chain<T>(this IAudioActiveProducer producer, T addConsumer) where T : IAudioPassiveConsumer
+		if (producer.OutStream is null)
 		{
-			if (producer.OutStream is null)
-			{
-				producer.OutStream = addConsumer;
-			}
-			else if (producer.OutStream is PassiveSplitterPipe splitter)
-			{
-				splitter.Add(addConsumer);
-			}
-			else
-			{
-				splitter = new PassiveSplitterPipe();
-				splitter.Add(addConsumer);
-				splitter.Add(producer.OutStream);
-				producer.OutStream = splitter;
-			}
-			return addConsumer;
+			producer.OutStream = addConsumer;
 		}
+		else if (producer.OutStream is PassiveSplitterPipe splitter)
+		{
+			splitter.Add(addConsumer);
+		}
+		else
+		{
+			splitter = new PassiveSplitterPipe();
+			splitter.Add(addConsumer);
+			splitter.Add(producer.OutStream);
+			producer.OutStream = splitter;
+		}
+		return addConsumer;
+	}
 
-		public static T Chain<T>(this IAudioActiveProducer producer, Action<T>? init = null) where T : IAudioPassiveConsumer, new()
-		{
-			var addConsumer = new T();
-			init?.Invoke(addConsumer);
-			return producer.Chain(addConsumer);
-		}
+	public static T Chain<T>(this IAudioActiveProducer producer, Action<T>? init = null) where T : IAudioPassiveConsumer, new()
+	{
+		var addConsumer = new T();
+		init?.Invoke(addConsumer);
+		return producer.Chain(addConsumer);
+	}
 
-		public static T Into<T>(this IAudioPassiveProducer producer, T reader) where T : IAudioActiveConsumer
-		{
-			reader.InStream = producer;
-			return reader;
-		}
+	public static T Into<T>(this IAudioPassiveProducer producer, T reader) where T : IAudioActiveConsumer
+	{
+		reader.InStream = producer;
+		return reader;
+	}
 
-		public static T Into<T>(this IAudioPassiveProducer producer, Action<T>? init = null) where T : IAudioActiveConsumer, new()
-		{
-			var reader = new T();
-			init?.Invoke(reader);
-			return producer.Into(reader);
-		}
+	public static T Into<T>(this IAudioPassiveProducer producer, Action<T>? init = null) where T : IAudioActiveConsumer, new()
+	{
+		var reader = new T();
+		init?.Invoke(reader);
+		return producer.Into(reader);
 	}
 }

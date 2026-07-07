@@ -12,60 +12,59 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace TSLib.Helper
-{
-	internal static class NativeLibraryLoader
-	{
-		private static readonly TSLib.Logging.Logger Log = TSLib.Logging.Logger.Create();
+namespace TSLib.Helper;
 
-		public static bool DirectLoadLibrary(string lib, Action? dummyLoad = null)
+internal static class NativeLibraryLoader
+{
+	private static readonly TSLib.Logging.Logger Log = TSLib.Logging.Logger.Create();
+
+	public static bool DirectLoadLibrary(string lib, Action? dummyLoad = null)
+	{
+		if (OperatingSystem.IsLinux())
 		{
-			if (OperatingSystem.IsLinux())
+			try
 			{
-				try
-				{
-					dummyLoad?.Invoke();
-				}
-				catch (DllNotFoundException ex)
-				{
-					Log.Error(ex, "Failed to load library \"{0}\".", lib);
-					return false;
-				}
+				dummyLoad?.Invoke();
 			}
-			else
+			catch (DllNotFoundException ex)
 			{
-				foreach (var libPath in LibPathOptions(lib))
-				{
-					Log.Debug("Loading \"{0}\" from \"{1}\"", lib, libPath);
-					if (NativeLibrary.TryLoad(libPath, out _))
-						return true;
-				}
-				Log.Error("Failed to load library \"{0}\", error: {1}", lib, Marshal.GetLastWin32Error());
+				Log.Error(ex, "Failed to load library \"{0}\".", lib);
 				return false;
 			}
-			return true;
 		}
-
-		private static IEnumerable<string> LibPathOptions(string lib)
+		else
 		{
-			var fullPath = Directory.GetCurrentDirectory();
-			yield return Path.Combine(fullPath, "lib", ArchFolder, lib);
-			yield return Path.Combine(fullPath, "lib", lib);
-			var asmPath = Path.GetDirectoryName(typeof(NativeLibraryLoader).Assembly.Location)!;
-			yield return Path.Combine(asmPath, "lib", ArchFolder, lib);
-			yield return Path.Combine(asmPath, "lib", lib);
-		}
-
-		public static string ArchFolder
-		{
-			get
+			foreach (var libPath in LibPathOptions(lib))
 			{
-				if (IntPtr.Size == 8)
-					return "x64";
-				if (IntPtr.Size == 4)
-					return "x86";
-				return "xOther";
+				Log.Debug("Loading \"{0}\" from \"{1}\"", lib, libPath);
+				if (NativeLibrary.TryLoad(libPath, out _))
+					return true;
 			}
+			Log.Error("Failed to load library \"{0}\", error: {1}", lib, Marshal.GetLastWin32Error());
+			return false;
+		}
+		return true;
+	}
+
+	private static IEnumerable<string> LibPathOptions(string lib)
+	{
+		var fullPath = Directory.GetCurrentDirectory();
+		yield return Path.Combine(fullPath, "lib", ArchFolder, lib);
+		yield return Path.Combine(fullPath, "lib", lib);
+		var asmPath = Path.GetDirectoryName(typeof(NativeLibraryLoader).Assembly.Location)!;
+		yield return Path.Combine(asmPath, "lib", ArchFolder, lib);
+		yield return Path.Combine(asmPath, "lib", lib);
+	}
+
+	public static string ArchFolder
+	{
+		get
+		{
+			if (IntPtr.Size == 8)
+				return "x64";
+			if (IntPtr.Size == 4)
+				return "x86";
+			return "xOther";
 		}
 	}
 }

@@ -9,31 +9,30 @@
 
 using System;
 
-namespace TSLib.Full.Book
+namespace TSLib.Full.Book;
+
+public struct MaxClients
 {
-	public struct MaxClients
-	{
-		public ushort Count { get; internal set; }
-		public MaxClientsKind LimitKind { get; internal set; }
-	}
+	public ushort Count { get; internal set; }
+	public MaxClientsKind LimitKind { get; internal set; }
+}
 
-	public enum MaxClientsKind
-	{
-		Unlimited,
-		Inherited,
-		Limited,
-	}
+public enum MaxClientsKind
+{
+	Unlimited,
+	Inherited,
+	Limited,
+}
 
-	public enum ChannelType
-	{
-		Temporary,
-		SemiPermanent,
-		Permanent,
-	}
+public enum ChannelType
+{
+	Temporary,
+	SemiPermanent,
+	Permanent,
+}
 
-	public struct TalkPowerRequest
-	{
-		public DateTime Time { get; internal set; }
-		public string Message { get; internal set; }
-	}
+public struct TalkPowerRequest
+{
+	public DateTime Time { get; internal set; }
+	public string Message { get; internal set; }
 }

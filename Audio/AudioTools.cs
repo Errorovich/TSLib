@@ -9,26 +9,25 @@
 
 using System.Runtime.InteropServices;
 
-namespace TSLib.Audio
+namespace TSLib.Audio;
+
+public static class AudioTools
 {
-	public static class AudioTools
+	public static bool TryMonoToStereo(byte[] pcm, ref int length)
 	{
-		public static bool TryMonoToStereo(byte[] pcm, ref int length)
+		if (length / 2 >= pcm.Length)
+			return false;
+
+		var shortArr = MemoryMarshal.Cast<byte, short>(pcm);
+
+		for (int i = (length / 2) - 1; i >= 0; i--)
 		{
-			if (length / 2 >= pcm.Length)
-				return false;
-
-			var shortArr = MemoryMarshal.Cast<byte, short>(pcm);
-
-			for (int i = (length / 2) - 1; i >= 0; i--)
-			{
-				shortArr[i * 2 + 0] = shortArr[i];
-				shortArr[i * 2 + 1] = shortArr[i];
-			}
-
-			length *= 2;
-
-			return true;
+			shortArr[i * 2 + 0] = shortArr[i];
+			shortArr[i * 2 + 1] = shortArr[i];
 		}
+
+		length *= 2;
+
+		return true;
 	}
 }

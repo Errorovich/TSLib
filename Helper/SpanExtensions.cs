@@ -9,12 +9,11 @@
 
 using System;
 
-namespace TSLib.Helper
-{
-	public static class SpanExtensions
-	{
-		public static string NewUtf8String(this ReadOnlySpan<byte> span) => Tools.Utf8Encoder.GetString(span);
+namespace TSLib.Helper;
 
-		public static string NewUtf8String(this Span<byte> span) => ((ReadOnlySpan<byte>)span).NewUtf8String();
-	}
+public static class SpanExtensions
+{
+	public static string NewUtf8String(this ReadOnlySpan<byte> span) => Tools.Utf8Encoder.GetString(span);
+
+	public static string NewUtf8String(this Span<byte> span) => ((ReadOnlySpan<byte>)span).NewUtf8String();
 }

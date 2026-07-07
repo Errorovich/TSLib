@@ -13,317 +13,316 @@ using TSLib.Helper;
 using TSLib.Messages;
 using SocketAddr = System.String;
 
-namespace TSLib.Full.Book
+namespace TSLib.Full.Book;
+
+public partial class Connection
 {
-	public partial class Connection
+	// Логгер для сгенерированного M2B.cs (Update*-методы): объявлен здесь, в рукописном
+	// partial, чтобы пережить перегенерацию шаблона. Используется только в ветках
+	// «protocol error» (obj == null) — не горячий путь.
+	private static readonly TSLib.Logging.Logger Log = TSLib.Logging.Logger.Create();
+
+	public Client? Self() => GetClient(OwnClient);
+	public Channel? CurrentChannel()
 	{
-		// Логгер для сгенерированного M2B.cs (Update*-методы): объявлен здесь, в рукописном
-		// partial, чтобы пережить перегенерацию шаблона. Используется только в ветках
-		// «protocol error» (obj == null) — не горячий путь.
-		private static readonly TSLib.Logging.Logger Log = TSLib.Logging.Logger.Create();
-
-		public Client? Self() => GetClient(OwnClient);
-		public Channel? CurrentChannel()
-		{
-			var self = Self();
-			if (self is null)
-				return null;
-			return GetChannel(self.Channel);
-		}
-
-		private void SetServer(Server server)
-		{
-			Server = server;
-		}
-
-		private Channel? GetChannel(ChannelId id)
-		{
-			if (Channels.TryGetValue(id, out var channel))
-				return channel;
+		var self = Self();
+		if (self is null)
 			return null;
-		}
-
-		private void SetChannel(Channel channel, ChannelId id)
-		{
-			channel.Id = id;
-			Channels[id] = channel;
-		}
-
-		private void RemoveChannel(ChannelId id)
-		{
-			var cur = Channels[id];
-			Channels.Remove(id);
-			ChannelOrderRemove(id, cur.Order);
-		}
-
-		private Client? GetClient(ClientId id)
-		{
-			if (Clients.TryGetValue(id, out var client))
-				return client;
-			return null;
-		}
-
-		private void SetClient(Client client, ClientId id)
-		{
-			client.Id = id;
-			Clients[id] = client;
-		}
-
-		private void RemoveClient(ClientId id)
-		{
-			Clients.Remove(id);
-		}
-
-		private void SetConnectionClientData(ConnectionClientData connectionClientData, ClientId id)
-		{
-			if (!Clients.TryGetValue(id, out var client))
-				return;
-			client.ConnectionData = connectionClientData;
-		}
-
-		private void SetServerGroup(ServerGroup serverGroup, ServerGroupId id)
-		{
-			ServerGroups[id] = serverGroup;
-		}
-
-		private void SetChannelGroup(ChannelGroup channelGroup, ChannelGroupId id)
-		{
-			ChannelGroups[id] = channelGroup;
-		}
-
-		private Server GetServer()
-		{
-			return Server;
-		}
-
-		// Optional/connection sub-objects are created on demand: the server only sends
-		// their fields on explicit request, so a missing object is not a protocol error.
-		private OptionalChannelData? GetOptionalChannelData(ChannelId id)
-		{
-			var channel = GetChannel(id);
-			if (channel == null)
-				return null;
-			return channel.OptionalData ??= new OptionalChannelData();
-		}
-
-		private void RemoveOptionalChannelData(ChannelId id)
-		{
-			var channel = GetChannel(id);
-			if (channel != null)
-				channel.OptionalData = null;
-		}
-
-		private OptionalClientData? GetOptionalClientData(ClientId id)
-		{
-			var client = GetClient(id);
-			if (client == null)
-				return null;
-			return client.OptionalData ??= new OptionalClientData();
-		}
-
-		private ConnectionClientData? GetConnectionClientData(ClientId id)
-		{
-			var client = GetClient(id);
-			if (client == null)
-				return null;
-			return client.ConnectionData ??= new ConnectionClientData();
-		}
-
-		private OptionalServerData GetOptionalServerData()
-		{
-			return Server.OptionalData ??= new OptionalServerData();
-		}
-
-		private void RemoveOptionalServerData()
-		{
-			Server.OptionalData = null;
-		}
-
-		private ConnectionServerData GetConnectionServerData()
-		{
-			return Server.ConnectionData ??= new ConnectionServerData();
-		}
-
-		public void Reset()
-		{
-			Channels.Clear();
-			Clients.Clear();
-			ServerGroups.Clear();
-			ChannelGroups.Clear();
-			OwnClient = ClientId.Null;
-			Server = new Server();
-		}
-
-		// Manual post event functions
-
-		partial void PostClientEnterView(ClientEnterView msg) => SetOwnChannelSubscribed(msg.ClientId);
-		partial void PostClientMoved(ClientMoved msg) => SetOwnChannelSubscribed(msg.ClientId);
-		private void SetOwnChannelSubscribed(ClientId clientId)
-		{
-			if (clientId == OwnClient)
-			{
-				var curChan = CurrentChannel();
-				if (curChan != null)
-				{
-					curChan.Subscribed = true;
-				}
-			}
-		}
-
-		// Set channel subscribed when the current client is moved (called before the
-		// book Channel property is updated, so the target channel comes from the message)
-		private void SubscribeChannelFun(ClientMoved msg)
-		{
-			if (msg.ClientId != OwnClient)
-				return;
-			var channel = GetChannel(msg.TargetChannelId);
-			if (channel != null)
-				channel.Subscribed = true;
-		}
-
-		// Default codec is opus voice (server omits the field in notifychannelcreated)
-		private static Codec ChannelCodecCcFun(ChannelCreated msg) => msg.Codec ?? Codec.OpusVoice;
-
-		// Declarations mark VersionSign as reset-to-unknown on ClientUpdated ("Some(None)");
-		// the C# codegen skips null assignments, so this is effectively "leave unchanged".
-		private static string? ReturnSomeNone(ClientUpdated msg) => null;
-
-		// Manual move functions
-
-		private static (MaxClients?, MaxClients?) MaxClientsCcFun(ChannelCreated msg) => MaxClientsFun(msg.MaxClients, msg.IsMaxClientsUnlimited, msg.MaxFamilyClients, msg.IsMaxFamilyClientsUnlimited, msg.InheritsMaxFamilyClients);
-		private static (MaxClients?, MaxClients?) MaxClientsCeFun(ChannelEdited msg) => MaxClientsFun(msg.MaxClients, msg.IsMaxClientsUnlimited, msg.MaxFamilyClients, msg.IsMaxFamilyClientsUnlimited, msg.InheritsMaxFamilyClients);
-		private static (MaxClients?, MaxClients?) MaxClientsClFun(ChannelList msg) => MaxClientsFun(msg.MaxClients, msg.IsMaxClientsUnlimited, msg.MaxFamilyClients, msg.IsMaxFamilyClientsUnlimited, msg.InheritsMaxFamilyClients);
-		private static (MaxClients?, MaxClients?) MaxClientsFun(int? MaxClients, bool? IsMaxClientsUnlimited, int? MaxFamilyClients, bool? IsMaxFamilyClientsUnlimited, bool? InheritsMaxFamilyClients)
-		{
-			var chn = new MaxClients();
-			if (IsMaxClientsUnlimited == true) chn.LimitKind = MaxClientsKind.Unlimited;
-			else
-			{
-				chn.LimitKind = MaxClientsKind.Limited;
-				chn.Count = (ushort)Math.Max(Math.Min(ushort.MaxValue, MaxClients ?? ushort.MaxValue), 0);
-			}
-
-			var fam = new MaxClients();
-			if (IsMaxFamilyClientsUnlimited == true) fam.LimitKind = MaxClientsKind.Unlimited;
-			else if (InheritsMaxFamilyClients == true) fam.LimitKind = MaxClientsKind.Inherited;
-			else
-			{
-				fam.LimitKind = MaxClientsKind.Limited;
-				fam.Count = (ushort)Math.Max(Math.Min(ushort.MaxValue, MaxFamilyClients ?? ushort.MaxValue), 0);
-			}
-			return (chn, fam);
-		}
-
-		private static ChannelType ChannelTypeCcFun(ChannelCreated msg) => ChannelTypeFun(msg.IsSemiPermanent, msg.IsPermanent);
-		private static ChannelType ChannelTypeCeFun(ChannelEdited msg) => ChannelTypeFun(msg.IsSemiPermanent, msg.IsPermanent);
-		private static ChannelType ChannelTypeClFun(ChannelList msg) => ChannelTypeFun(msg.IsSemiPermanent, msg.IsPermanent);
-		private static ChannelType ChannelTypeFun(bool? semi, bool? perma)
-		{
-			if (semi == true) return ChannelType.SemiPermanent;
-			else if (perma == true) return ChannelType.Permanent;
-			else return ChannelType.Temporary;
-		}
-
-		private static string? AwayCevFun(ClientEnterView msg) => AwayFun(msg.IsAway, msg.AwayMessage);
-		private static string? AwayCuFun(ClientUpdated msg) => AwayFun(msg.IsAway, msg.AwayMessage);
-		private static string? AwayFun(bool? away, string? msg)
-			=> away switch
-			{
-				true => msg ?? "",
-				_ => null,
-			};
-
-		private static TalkPowerRequest? TalkPowerCevFun(ClientEnterView msg)
-		{
-			if (msg.TalkPowerRequestTime != Tools.UnixTimeStart)
-				return new TalkPowerRequest() { Time = msg.TalkPowerRequestTime, Message = msg.TalkPowerRequestMessage ?? "" };
-			return null;
-		}
-		private static TalkPowerRequest? TalkPowerCuFun(ClientUpdated msg) => TalkPowerFun(msg.TalkPowerRequestTime, msg.TalkPowerRequestMessage);
-		private static TalkPowerRequest? TalkPowerFun(DateTime? time, string? message)
-		{
-			if (time != null && time != Tools.UnixTimeStart) // TODO
-				return new TalkPowerRequest() { Time = time.Value, Message = message ?? "" };
-			return null;
-		}
-
-		private static ClientType ClientTypeCevFun(ClientEnterView msg) => msg.ClientType;
-
-		private ChannelId ChannelOrderCcFun(ChannelCreated msg)
-		{
-			ChannelOrderInsert(msg.ChannelId, msg.Order, msg.ParentId);
-			return msg.Order;
-		}
-		private ChannelId ChannelOrderCmFun(ChannelMoved msg) => ChannelOrderMoveFun(msg.ChannelId, msg.Order, msg.ParentId);
-		private ChannelId? ChannelOrderCeFun(ChannelEdited msg)
-		{
-			if (msg.Order == null)
-				return null;
-			return ChannelOrderMoveFun(msg.ChannelId, msg.Order.Value, msg.ParentId);
-		}
-
-		private ChannelId ChannelOrderMoveFun(ChannelId id, ChannelId newOrder, ChannelId? parent)
-		{
-			// [ C:4 | O:0 ]
-			// [ C:5 | O:4 ]──┐
-			// [ C:7 | O:5 ]  │ (Up1: O -> 4)
-			// [            <─┘ (Chg: C:5 | O:7)
-			// [ C:8 | O:7 ]    (Up2: O -> 5)
-
-			var cur = Channels[id];
-			var oldOrder = cur.Order;
-			var newParent = parent ?? cur.Parent;
-
-			ChannelOrderRemove(id, oldOrder); // Up1
-			ChannelOrderInsert(id, newOrder, newParent); // Up2
-			return newOrder;
-		}
-
-		private void ChannelOrderRemove(ChannelId id, ChannelId oldOrder)
-		{
-			// [ C:7 | O:_ ]
-			// [ C:5 | O:7 ] ─>X
-			// [ C:_ | O:5 ]     (Upd: O -> 7)
-
-			var chan = Channels.Values.FirstOrDefault(x => x.Order == id);
-			if (chan != null) chan.Order = oldOrder;
-		}
-
-		private void ChannelOrderInsert(ChannelId id, ChannelId newOrder, ChannelId parent)
-		{
-			// [ C:7 | O:_ ]
-			// [            <── (New: C:5 | O:7)
-			// [ C:_ | O:7 ]    (Upd: O -> 5)
-
-			// or
-
-			// [ C:_ | O:_ ]     
-			//  ├ [            <── (New: C:5 | O:0)
-			//  └ [ C:_ | O:0 ]    (Upd: O -> 5)
-
-			// Multiple channel with Order:0 might exist,
-			// we need to find one with the same parent as the inserted channel
-			var chan = Channels.Values.FirstOrDefault(x => x.Order == newOrder && x.Parent == parent);
-			if (chan != null) chan.Order = id;
-		}
-
-		private static SocketAddr AddressFun(ClientConnectionInfo msg) => msg.Ip;
-
-		private void SetClientDataFun(InitServer initServer)
-		{
-			OwnClient = initServer.ClientId;
-		}
-
-		private bool ChannelSubscribeFun(ChannelSubscribed _) => true;
-
-		private bool ChannelUnsubscribeFun(ChannelUnsubscribed msg)
-		{
-			var goneClients = Clients.Values.Where(client => client.Channel == msg.ChannelId).ToArray();
-			foreach (var clid in goneClients)
-				Clients.Remove(clid.Id);
-			return false;
-		}
-
-		private static bool ReturnFalse<T>(T _) => false;
+		return GetChannel(self.Channel);
 	}
+
+	private void SetServer(Server server)
+	{
+		Server = server;
+	}
+
+	private Channel? GetChannel(ChannelId id)
+	{
+		if (Channels.TryGetValue(id, out var channel))
+			return channel;
+		return null;
+	}
+
+	private void SetChannel(Channel channel, ChannelId id)
+	{
+		channel.Id = id;
+		Channels[id] = channel;
+	}
+
+	private void RemoveChannel(ChannelId id)
+	{
+		var cur = Channels[id];
+		Channels.Remove(id);
+		ChannelOrderRemove(id, cur.Order);
+	}
+
+	private Client? GetClient(ClientId id)
+	{
+		if (Clients.TryGetValue(id, out var client))
+			return client;
+		return null;
+	}
+
+	private void SetClient(Client client, ClientId id)
+	{
+		client.Id = id;
+		Clients[id] = client;
+	}
+
+	private void RemoveClient(ClientId id)
+	{
+		Clients.Remove(id);
+	}
+
+	private void SetConnectionClientData(ConnectionClientData connectionClientData, ClientId id)
+	{
+		if (!Clients.TryGetValue(id, out var client))
+			return;
+		client.ConnectionData = connectionClientData;
+	}
+
+	private void SetServerGroup(ServerGroup serverGroup, ServerGroupId id)
+	{
+		ServerGroups[id] = serverGroup;
+	}
+
+	private void SetChannelGroup(ChannelGroup channelGroup, ChannelGroupId id)
+	{
+		ChannelGroups[id] = channelGroup;
+	}
+
+	private Server GetServer()
+	{
+		return Server;
+	}
+
+	// Optional/connection sub-objects are created on demand: the server only sends
+	// their fields on explicit request, so a missing object is not a protocol error.
+	private OptionalChannelData? GetOptionalChannelData(ChannelId id)
+	{
+		var channel = GetChannel(id);
+		if (channel == null)
+			return null;
+		return channel.OptionalData ??= new OptionalChannelData();
+	}
+
+	private void RemoveOptionalChannelData(ChannelId id)
+	{
+		var channel = GetChannel(id);
+		if (channel != null)
+			channel.OptionalData = null;
+	}
+
+	private OptionalClientData? GetOptionalClientData(ClientId id)
+	{
+		var client = GetClient(id);
+		if (client == null)
+			return null;
+		return client.OptionalData ??= new OptionalClientData();
+	}
+
+	private ConnectionClientData? GetConnectionClientData(ClientId id)
+	{
+		var client = GetClient(id);
+		if (client == null)
+			return null;
+		return client.ConnectionData ??= new ConnectionClientData();
+	}
+
+	private OptionalServerData GetOptionalServerData()
+	{
+		return Server.OptionalData ??= new OptionalServerData();
+	}
+
+	private void RemoveOptionalServerData()
+	{
+		Server.OptionalData = null;
+	}
+
+	private ConnectionServerData GetConnectionServerData()
+	{
+		return Server.ConnectionData ??= new ConnectionServerData();
+	}
+
+	public void Reset()
+	{
+		Channels.Clear();
+		Clients.Clear();
+		ServerGroups.Clear();
+		ChannelGroups.Clear();
+		OwnClient = ClientId.Null;
+		Server = new Server();
+	}
+
+	// Manual post event functions
+
+	partial void PostClientEnterView(ClientEnterView msg) => SetOwnChannelSubscribed(msg.ClientId);
+	partial void PostClientMoved(ClientMoved msg) => SetOwnChannelSubscribed(msg.ClientId);
+	private void SetOwnChannelSubscribed(ClientId clientId)
+	{
+		if (clientId == OwnClient)
+		{
+			var curChan = CurrentChannel();
+			if (curChan != null)
+			{
+				curChan.Subscribed = true;
+			}
+		}
+	}
+
+	// Set channel subscribed when the current client is moved (called before the
+	// book Channel property is updated, so the target channel comes from the message)
+	private void SubscribeChannelFun(ClientMoved msg)
+	{
+		if (msg.ClientId != OwnClient)
+			return;
+		var channel = GetChannel(msg.TargetChannelId);
+		if (channel != null)
+			channel.Subscribed = true;
+	}
+
+	// Default codec is opus voice (server omits the field in notifychannelcreated)
+	private static Codec ChannelCodecCcFun(ChannelCreated msg) => msg.Codec ?? Codec.OpusVoice;
+
+	// Declarations mark VersionSign as reset-to-unknown on ClientUpdated ("Some(None)");
+	// the C# codegen skips null assignments, so this is effectively "leave unchanged".
+	private static string? ReturnSomeNone(ClientUpdated msg) => null;
+
+	// Manual move functions
+
+	private static (MaxClients?, MaxClients?) MaxClientsCcFun(ChannelCreated msg) => MaxClientsFun(msg.MaxClients, msg.IsMaxClientsUnlimited, msg.MaxFamilyClients, msg.IsMaxFamilyClientsUnlimited, msg.InheritsMaxFamilyClients);
+	private static (MaxClients?, MaxClients?) MaxClientsCeFun(ChannelEdited msg) => MaxClientsFun(msg.MaxClients, msg.IsMaxClientsUnlimited, msg.MaxFamilyClients, msg.IsMaxFamilyClientsUnlimited, msg.InheritsMaxFamilyClients);
+	private static (MaxClients?, MaxClients?) MaxClientsClFun(ChannelList msg) => MaxClientsFun(msg.MaxClients, msg.IsMaxClientsUnlimited, msg.MaxFamilyClients, msg.IsMaxFamilyClientsUnlimited, msg.InheritsMaxFamilyClients);
+	private static (MaxClients?, MaxClients?) MaxClientsFun(int? MaxClients, bool? IsMaxClientsUnlimited, int? MaxFamilyClients, bool? IsMaxFamilyClientsUnlimited, bool? InheritsMaxFamilyClients)
+	{
+		var chn = new MaxClients();
+		if (IsMaxClientsUnlimited == true) chn.LimitKind = MaxClientsKind.Unlimited;
+		else
+		{
+			chn.LimitKind = MaxClientsKind.Limited;
+			chn.Count = (ushort)Math.Max(Math.Min(ushort.MaxValue, MaxClients ?? ushort.MaxValue), 0);
+		}
+
+		var fam = new MaxClients();
+		if (IsMaxFamilyClientsUnlimited == true) fam.LimitKind = MaxClientsKind.Unlimited;
+		else if (InheritsMaxFamilyClients == true) fam.LimitKind = MaxClientsKind.Inherited;
+		else
+		{
+			fam.LimitKind = MaxClientsKind.Limited;
+			fam.Count = (ushort)Math.Max(Math.Min(ushort.MaxValue, MaxFamilyClients ?? ushort.MaxValue), 0);
+		}
+		return (chn, fam);
+	}
+
+	private static ChannelType ChannelTypeCcFun(ChannelCreated msg) => ChannelTypeFun(msg.IsSemiPermanent, msg.IsPermanent);
+	private static ChannelType ChannelTypeCeFun(ChannelEdited msg) => ChannelTypeFun(msg.IsSemiPermanent, msg.IsPermanent);
+	private static ChannelType ChannelTypeClFun(ChannelList msg) => ChannelTypeFun(msg.IsSemiPermanent, msg.IsPermanent);
+	private static ChannelType ChannelTypeFun(bool? semi, bool? perma)
+	{
+		if (semi == true) return ChannelType.SemiPermanent;
+		else if (perma == true) return ChannelType.Permanent;
+		else return ChannelType.Temporary;
+	}
+
+	private static string? AwayCevFun(ClientEnterView msg) => AwayFun(msg.IsAway, msg.AwayMessage);
+	private static string? AwayCuFun(ClientUpdated msg) => AwayFun(msg.IsAway, msg.AwayMessage);
+	private static string? AwayFun(bool? away, string? msg)
+		=> away switch
+		{
+			true => msg ?? "",
+			_ => null,
+		};
+
+	private static TalkPowerRequest? TalkPowerCevFun(ClientEnterView msg)
+	{
+		if (msg.TalkPowerRequestTime != Tools.UnixTimeStart)
+			return new TalkPowerRequest() { Time = msg.TalkPowerRequestTime, Message = msg.TalkPowerRequestMessage ?? "" };
+		return null;
+	}
+	private static TalkPowerRequest? TalkPowerCuFun(ClientUpdated msg) => TalkPowerFun(msg.TalkPowerRequestTime, msg.TalkPowerRequestMessage);
+	private static TalkPowerRequest? TalkPowerFun(DateTime? time, string? message)
+	{
+		if (time != null && time != Tools.UnixTimeStart) // TODO
+			return new TalkPowerRequest() { Time = time.Value, Message = message ?? "" };
+		return null;
+	}
+
+	private static ClientType ClientTypeCevFun(ClientEnterView msg) => msg.ClientType;
+
+	private ChannelId ChannelOrderCcFun(ChannelCreated msg)
+	{
+		ChannelOrderInsert(msg.ChannelId, msg.Order, msg.ParentId);
+		return msg.Order;
+	}
+	private ChannelId ChannelOrderCmFun(ChannelMoved msg) => ChannelOrderMoveFun(msg.ChannelId, msg.Order, msg.ParentId);
+	private ChannelId? ChannelOrderCeFun(ChannelEdited msg)
+	{
+		if (msg.Order == null)
+			return null;
+		return ChannelOrderMoveFun(msg.ChannelId, msg.Order.Value, msg.ParentId);
+	}
+
+	private ChannelId ChannelOrderMoveFun(ChannelId id, ChannelId newOrder, ChannelId? parent)
+	{
+		// [ C:4 | O:0 ]
+		// [ C:5 | O:4 ]──┐
+		// [ C:7 | O:5 ]  │ (Up1: O -> 4)
+		// [            <─┘ (Chg: C:5 | O:7)
+		// [ C:8 | O:7 ]    (Up2: O -> 5)
+
+		var cur = Channels[id];
+		var oldOrder = cur.Order;
+		var newParent = parent ?? cur.Parent;
+
+		ChannelOrderRemove(id, oldOrder); // Up1
+		ChannelOrderInsert(id, newOrder, newParent); // Up2
+		return newOrder;
+	}
+
+	private void ChannelOrderRemove(ChannelId id, ChannelId oldOrder)
+	{
+		// [ C:7 | O:_ ]
+		// [ C:5 | O:7 ] ─>X
+		// [ C:_ | O:5 ]     (Upd: O -> 7)
+
+		var chan = Channels.Values.FirstOrDefault(x => x.Order == id);
+		if (chan != null) chan.Order = oldOrder;
+	}
+
+	private void ChannelOrderInsert(ChannelId id, ChannelId newOrder, ChannelId parent)
+	{
+		// [ C:7 | O:_ ]
+		// [            <── (New: C:5 | O:7)
+		// [ C:_ | O:7 ]    (Upd: O -> 5)
+
+		// or
+
+		// [ C:_ | O:_ ]     
+		//  ├ [            <── (New: C:5 | O:0)
+		//  └ [ C:_ | O:0 ]    (Upd: O -> 5)
+
+		// Multiple channel with Order:0 might exist,
+		// we need to find one with the same parent as the inserted channel
+		var chan = Channels.Values.FirstOrDefault(x => x.Order == newOrder && x.Parent == parent);
+		if (chan != null) chan.Order = id;
+	}
+
+	private static SocketAddr AddressFun(ClientConnectionInfo msg) => msg.Ip;
+
+	private void SetClientDataFun(InitServer initServer)
+	{
+		OwnClient = initServer.ClientId;
+	}
+
+	private bool ChannelSubscribeFun(ChannelSubscribed _) => true;
+
+	private bool ChannelUnsubscribeFun(ChannelUnsubscribed msg)
+	{
+		var goneClients = Clients.Values.Where(client => client.Channel == msg.ChannelId).ToArray();
+		foreach (var clid in goneClients)
+			Clients.Remove(clid.Id);
+		return false;
+	}
+
+	private static bool ReturnFalse<T>(T _) => false;
 }

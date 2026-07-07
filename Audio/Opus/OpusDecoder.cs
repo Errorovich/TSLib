@@ -22,131 +22,130 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace TSLib.Audio.Opus
+namespace TSLib.Audio.Opus;
+
+/// <summary>
+/// Opus audio decoder.
+/// </summary>
+public sealed class OpusDecoder : IDisposable
 {
 	/// <summary>
-	/// Opus audio decoder.
+	/// Creates a new Opus decoder.
 	/// </summary>
-	public sealed class OpusDecoder : IDisposable
+	/// <param name="outputSampleRate">Sample rate to decode at (Hz). This must be one of 8000, 12000, 16000, 24000, or 48000.</param>
+	/// <param name="outputChannels">Number of channels to decode.</param>
+	/// <returns>A new <c>OpusDecoder</c>.</returns>
+	public static OpusDecoder Create(int outputSampleRate, int outputChannels)
 	{
-		/// <summary>
-		/// Creates a new Opus decoder.
-		/// </summary>
-		/// <param name="outputSampleRate">Sample rate to decode at (Hz). This must be one of 8000, 12000, 16000, 24000, or 48000.</param>
-		/// <param name="outputChannels">Number of channels to decode.</param>
-		/// <returns>A new <c>OpusDecoder</c>.</returns>
-		public static OpusDecoder Create(int outputSampleRate, int outputChannels)
+		if (outputSampleRate != 8000 &&
+			outputSampleRate != 12000 &&
+			outputSampleRate != 16000 &&
+			outputSampleRate != 24000 &&
+			outputSampleRate != 48000)
+			throw new ArgumentOutOfRangeException(nameof(outputSampleRate));
+		if (outputChannels != 1 && outputChannels != 2)
+			throw new ArgumentOutOfRangeException(nameof(outputChannels));
+
+		var decoderPtr = NativeMethods.opus_decoder_create(outputSampleRate, outputChannels, out IntPtr error);
+		if ((Errors)error != Errors.Ok)
 		{
-			if (outputSampleRate != 8000 &&
-				outputSampleRate != 12000 &&
-				outputSampleRate != 16000 &&
-				outputSampleRate != 24000 &&
-				outputSampleRate != 48000)
-				throw new ArgumentOutOfRangeException(nameof(outputSampleRate));
-			if (outputChannels != 1 && outputChannels != 2)
-				throw new ArgumentOutOfRangeException(nameof(outputChannels));
-
-			var decoderPtr = NativeMethods.opus_decoder_create(outputSampleRate, outputChannels, out IntPtr error);
-			if ((Errors)error != Errors.Ok)
-			{
-				throw new Exception("Exception occured while creating decoder");
-			}
-			return new OpusDecoder(decoderPtr, outputSampleRate, outputChannels);
+			throw new Exception("Exception occured while creating decoder");
 		}
+		return new OpusDecoder(decoderPtr, outputSampleRate, outputChannels);
+	}
 
-		private IntPtr decoder;
+	private IntPtr decoder;
 
-		private OpusDecoder(IntPtr decoder, int outputSamplingRate, int outputChannels)
-		{
-			this.decoder = decoder;
-			OutputSamplingRate = outputSamplingRate;
-			OutputChannels = outputChannels;
-		}
+	private OpusDecoder(IntPtr decoder, int outputSamplingRate, int outputChannels)
+	{
+		this.decoder = decoder;
+		OutputSamplingRate = outputSamplingRate;
+		OutputChannels = outputChannels;
+	}
 
-        /// <summary>
-        /// Produces PCM samples from Opus encoded data.
-        /// </summary>
-        /// <param name="inputOpusData">Opus encoded data to decode, null for dropped packet.</param>
-        /// <param name="outputDecodedBuffer">PCM audio samples buffer.</param>
-        /// <returns>PCM audio samples.</returns>
-        public Span<byte> Decode(Span<byte> inputOpusData, ushort seq, Span<byte> outputDecodedBuffer) {
-            if (disposed)
-                throw new ObjectDisposedException(nameof(OpusDecoder));
+    /// <summary>
+    /// Produces PCM samples from Opus encoded data.
+    /// </summary>
+    /// <param name="inputOpusData">Opus encoded data to decode, null for dropped packet.</param>
+    /// <param name="outputDecodedBuffer">PCM audio samples buffer.</param>
+    /// <returns>PCM audio samples.</returns>
+    public Span<byte> Decode(Span<byte> inputOpusData, ushort seq, Span<byte> outputDecodedBuffer) {
+        if (disposed)
+            throw new ObjectDisposedException(nameof(OpusDecoder));
 
-            if (inputOpusData.Length < 2)
-                return Span<byte>.Empty;
+        if (inputOpusData.Length < 2)
+            return Span<byte>.Empty;
 
-            int frameSize;
-            int length;
+        int frameSize;
+        int length;
 
-            if (lastSeq != ushort.MaxValue && seq != lastSeq + 1) {
-                frameSize = FrameCount(outputDecodedBuffer.Length);
-                length = NativeMethods.opus_decode(decoder, null, 0, out MemoryMarshal.GetReference(outputDecodedBuffer), frameSize, 0);
-            }
-
-            byte[] packet = inputOpusData.ToArray();
-
+        if (lastSeq != ushort.MaxValue && seq != lastSeq + 1) {
             frameSize = FrameCount(outputDecodedBuffer.Length);
-
-            length = NativeMethods.opus_decode(decoder, packet, inputOpusData.Length, out MemoryMarshal.GetReference(outputDecodedBuffer), frameSize, 0);
-
-            if (length < 0)
-                return Span<byte>.Empty;
-
-            var decodedLength = length * 2 * OutputChannels;
-
-            return outputDecodedBuffer.Slice(0, decodedLength);
+            length = NativeMethods.opus_decode(decoder, null, 0, out MemoryMarshal.GetReference(outputDecodedBuffer), frameSize, 0);
         }
 
-        /// <summary>
-        /// Determines the number of frames that can fit into a buffer of the given size.
-        /// </summary>
-        /// <param name="bufferSize"></param>
-        /// <returns></returns>
-        public int FrameCount(int bufferSize)
+        byte[] packet = inputOpusData.ToArray();
+
+        frameSize = FrameCount(outputDecodedBuffer.Length);
+
+        length = NativeMethods.opus_decode(decoder, packet, inputOpusData.Length, out MemoryMarshal.GetReference(outputDecodedBuffer), frameSize, 0);
+
+        if (length < 0)
+            return Span<byte>.Empty;
+
+        var decodedLength = length * 2 * OutputChannels;
+
+        return outputDecodedBuffer.Slice(0, decodedLength);
+    }
+
+    /// <summary>
+    /// Determines the number of frames that can fit into a buffer of the given size.
+    /// </summary>
+    /// <param name="bufferSize"></param>
+    /// <returns></returns>
+    public int FrameCount(int bufferSize)
+	{
+		//  seems like bitrate should be required
+		const int bitrate = 16;
+		int bytesPerSample = (bitrate / 8) * OutputChannels;
+		return bufferSize / bytesPerSample;
+	}
+
+	/// <summary>
+	/// Gets the output sampling rate of the decoder.
+	/// </summary>
+	public int OutputSamplingRate { get; }
+
+	/// <summary>
+	/// Gets the number of channels of the decoder.
+	/// </summary>
+	public int OutputChannels { get; }
+
+	/// <summary>
+	/// Gets or sets whether forward error correction is enabled or not.
+	/// </summary>
+	public bool ForwardErrorCorrection { get; set; }
+
+	~OpusDecoder()
+	{
+		Dispose();
+	}
+
+	private bool disposed;
+	private ushort lastSeq = ushort.MaxValue;
+	public void Dispose()
+	{
+		if (disposed)
+			return;
+
+		GC.SuppressFinalize(this);
+
+		if (decoder != IntPtr.Zero)
 		{
-			//  seems like bitrate should be required
-			const int bitrate = 16;
-			int bytesPerSample = (bitrate / 8) * OutputChannels;
-			return bufferSize / bytesPerSample;
+			NativeMethods.opus_decoder_destroy(decoder);
+			decoder = IntPtr.Zero;
 		}
 
-		/// <summary>
-		/// Gets the output sampling rate of the decoder.
-		/// </summary>
-		public int OutputSamplingRate { get; }
-
-		/// <summary>
-		/// Gets the number of channels of the decoder.
-		/// </summary>
-		public int OutputChannels { get; }
-
-		/// <summary>
-		/// Gets or sets whether forward error correction is enabled or not.
-		/// </summary>
-		public bool ForwardErrorCorrection { get; set; }
-
-		~OpusDecoder()
-		{
-			Dispose();
-		}
-
-		private bool disposed;
-		private ushort lastSeq = ushort.MaxValue;
-		public void Dispose()
-		{
-			if (disposed)
-				return;
-
-			GC.SuppressFinalize(this);
-
-			if (decoder != IntPtr.Zero)
-			{
-				NativeMethods.opus_decoder_destroy(decoder);
-				decoder = IntPtr.Zero;
-			}
-
-			disposed = true;
-		}
+		disposed = true;
 	}
 }
