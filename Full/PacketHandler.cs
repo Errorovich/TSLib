@@ -163,7 +163,7 @@ internal sealed class PacketHandler<TIn, TOut>
 			pingCheckRunning = 0;
 			pingCheck = Tools.Now;
 			if (resendTimer == null)
-				resendTimer = new Timer((_) => { /*using (MappedDiagnosticsLogicalContext.SetScoped("BotId", id))*/ ResendLoop(); }, null, ClockResolution, ClockResolution);
+				resendTimer = new Timer((_) => { Tools.SetLogId(id); ResendLoop(); }, null, ClockResolution, ClockResolution);
 			return R.Ok;
 		}
 	}
@@ -269,7 +269,7 @@ internal sealed class PacketHandler<TIn, TOut>
 		case PacketType.VoiceWhisper:
 			packet.PacketFlags |= PacketFlags.Unencrypted;
 			BinaryPrimitives.WriteUInt16BigEndian(packet.Data, packet.PacketId);
-			//LogRawVoice.Trace("[O] {0}", packet);
+			if (LogRawVoice.IsTraceEnabled) LogRawVoice.Trace("[O] {0}", packet);
 			break;
 
 		case PacketType.Command:
@@ -277,34 +277,34 @@ internal sealed class PacketHandler<TIn, TOut>
 			packet.PacketFlags |= PacketFlags.Newprotocol;
 			var resendPacket = new ResendPacket<TOut>(packet);
 			packetAckManager.Add(packet.PacketId, resendPacket);
-			//LogRaw.Debug("[O] {0}", packet);
+			LogRaw.Debug("[O] {0}", packet);
 			break;
 
 		case PacketType.Ping:
 			lastSentPingId = packet.PacketId;
 			packet.PacketFlags |= PacketFlags.Unencrypted;
-			//LogRaw.Trace("[O] Ping {0}", packet.PacketId);
+			LogRaw.Trace("[O] Ping {0}", packet.PacketId);
 			break;
 
 		case PacketType.Pong:
 			packet.PacketFlags |= PacketFlags.Unencrypted;
-			//LogRaw.Trace("[O] Pong {0}", BinaryPrimitives.ReadUInt16BigEndian(packet.Data));
+			LogRaw.Trace("[O] Pong {0}", BinaryPrimitives.ReadUInt16BigEndian(packet.Data));
 			break;
 
 		case PacketType.Ack:
-			//LogRaw.Debug("[O] Acking Ack: {0}", BinaryPrimitives.ReadUInt16BigEndian(packet.Data));
+			LogRaw.Debug("[O] Acking Ack: {0}", BinaryPrimitives.ReadUInt16BigEndian(packet.Data));
 			break;
 
 		case PacketType.AckLow:
 			packet.PacketFlags |= PacketFlags.Unencrypted;
-			//LogRaw.Debug("[O] Acking AckLow: {0}", BinaryPrimitives.ReadUInt16BigEndian(packet.Data));
+			LogRaw.Debug("[O] Acking AckLow: {0}", BinaryPrimitives.ReadUInt16BigEndian(packet.Data));
 			break;
 
 		case PacketType.Init1:
 			packet.PacketFlags |= PacketFlags.Unencrypted;
 			initPacketCheck = new ResendPacket<TOut>(packet);
-			//LogRaw.Debug("[O] InitID: {0}", packet.Data[4]);
-			//LogRaw.Trace("[O] {0}", packet);
+			LogRaw.Debug("[O] InitID: {0}", packet.Data[4]);
+			LogRaw.Trace("[O] {0}", packet);
 			break;
 
 		default: throw Tools.UnhandledDefault(packet.PacketType);
@@ -331,43 +331,41 @@ internal sealed class PacketHandler<TIn, TOut>
 
 	private static void FetchPacketEvent(object? selfObj, SocketAsyncEventArgs args)
 	{
-		var self = (PacketHandler<TIn, TOut>)args.UserToken;
+		var self = (PacketHandler<TIn, TOut>)args.UserToken!;
 
 		bool isAsync;
-		//using (MappedDiagnosticsLogicalContext.SetScoped("BotId", self.id))
-		//{
-			do
+		Tools.SetLogId(self.id);
+		do
+		{
+			if (self.closed != 0)
+				return;
+
+			if (args.SocketError == SocketError.Success)
+			{
+				self.FetchPackets(args.Buffer.AsSpan(0, args.BytesTransferred));
+			}
+			else
+			{
+				Log.Debug("Socket error: {@args}", args);
+				if (args.SocketError == SocketError.ConnectionReset)
+				{
+					self.Stop(Reason.SocketError);
+				}
+			}
+
+			lock (self.sendLoopLock)
 			{
 				if (self.closed != 0)
 					return;
 
-				if (args.SocketError == SocketError.Success)
-				{
-					self.FetchPackets(args.Buffer.AsSpan(0, args.BytesTransferred));
+				Trace.Assert(self.socket != null, nameof(self.socket) + " is null");
+				try { isAsync = self.socket!.ReceiveFromAsync(args); }
+				catch (Exception ex) {
+					Log.Debug(ex, "Error starting socket receive");
+					return;
 				}
-				else
-				{
-					Log.Debug("Socket error: {@args}", args);
-					if (args.SocketError == SocketError.ConnectionReset)
-					{
-						self.Stop(Reason.SocketError);
-					}
-				}
-
-				lock (self.sendLoopLock)
-				{
-					if (self.closed != 0)
-						return;
-
-					Trace.Assert(self.socket != null, nameof(self.socket) + " is null");
-					try { isAsync = self.socket!.ReceiveFromAsync(args); }
-					catch (Exception ex) { 
-						Log.Debug(ex, "Error starting socket receive");
-						return; 
-					}
-				}
-			} while (!isAsync);
-		//}
+			}
+		} while (!isAsync);
 	}
 
 	private void FetchPackets(Span<byte> buffer)
@@ -376,19 +374,19 @@ internal sealed class PacketHandler<TIn, TOut>
 		// Invalid packet, ignore
 		if (optpacket is null)
 		{
-			//LogRaw.Warn("Dropping invalid packet: {0}", DebugUtil.DebugToHex(buffer));
+			LogRaw.Warn("Dropping invalid packet: {0}", DebugUtil.DebugToHex(buffer));
 			return;
 		}
 		var packet = optpacket.Value;
 
 		// DebugToHex is costly and allocates, precheck before logging
-		//if (LogRaw.IsTraceEnabled)
-			//LogRaw.Trace("[I] Raw {0}", DebugUtil.DebugToHex(packet.Raw));
+		if (LogRaw.IsTraceEnabled)
+			LogRaw.Trace("[I] Raw {0}", DebugUtil.DebugToHex(packet.Raw));
 
 		FindIncommingGenerationId(ref packet);
 		if (!tsCrypt.Decrypt(ref packet))
 		{
-			//LogRaw.Warn("Dropping not decryptable packet: {0}", DebugUtil.DebugToHex(packet.Raw));
+			LogRaw.Warn("Dropping not decryptable packet: {0}", DebugUtil.DebugToHex(packet.Raw));
 			return;
 		}
 
@@ -399,37 +397,37 @@ internal sealed class PacketHandler<TIn, TOut>
 		switch (packet.PacketType)
 		{
 		case PacketType.Voice:
-			//LogRawVoice.Trace("[I] {0}", packet);
+			if (LogRawVoice.IsTraceEnabled) LogRawVoice.Trace("[I] {0}", packet);
 			passPacketToEvent = ReceiveVoice(ref packet, receiveWindowVoice);
 			break;
 		case PacketType.VoiceWhisper:
-			//LogRawVoice.Trace("[I] {0}", packet);
+			if (LogRawVoice.IsTraceEnabled) LogRawVoice.Trace("[I] {0}", packet);
 			passPacketToEvent = ReceiveVoice(ref packet, receiveWindowVoiceWhisper);
 			break;
 		case PacketType.Command:
-			//LogRaw.Debug("[I] {0}", packet);
+			LogRaw.Debug("[I] {0}", packet);
 			passPacketToEvent = ReceiveCommand(ref packet, receiveQueueCommand, PacketType.Ack);
 			break;
 		case PacketType.CommandLow:
-			//LogRaw.Debug("[I] {0}", packet);
+			LogRaw.Debug("[I] {0}", packet);
 			passPacketToEvent = ReceiveCommand(ref packet, receiveQueueCommandLow, PacketType.AckLow);
 			break;
 		case PacketType.Ping:
-			//LogRaw.Trace("[I] Ping {0}", packet.PacketId);
+			LogRaw.Trace("[I] Ping {0}", packet.PacketId);
 			ReceivePing(ref packet);
 			break;
 		case PacketType.Pong:
-			//LogRaw.Trace("[I] Pong {0}", BinaryPrimitives.ReadUInt16BigEndian(packet.Data));
+			LogRaw.Trace("[I] Pong {0}", BinaryPrimitives.ReadUInt16BigEndian(packet.Data));
 			passPacketToEvent = ReceivePong(ref packet);
 			break;
 		case PacketType.Ack:
-			//LogRaw.Debug("[I] Acking: {0}", BinaryPrimitives.ReadUInt16BigEndian(packet.Data));
+			LogRaw.Debug("[I] Acking: {0}", BinaryPrimitives.ReadUInt16BigEndian(packet.Data));
 			passPacketToEvent = ReceiveAck(ref packet);
 			break;
 		case PacketType.AckLow: break;
 		case PacketType.Init1:
-			//if (!LogRaw.IsTraceEnabled) LogRaw.Debug("[I] InitID: {0}", packet.Data[0]);
-			//if (!LogRaw.IsDebugEnabled) LogRaw.Trace("[I] {0}", packet);
+			if (!LogRaw.IsTraceEnabled) LogRaw.Debug("[I] InitID: {0}", packet.Data[0]);
+			if (!LogRaw.IsDebugEnabled) LogRaw.Trace("[I] {0}", packet);
 			passPacketToEvent = ReceiveInitAck(ref packet);
 			break;
 		default: throw Tools.UnhandledDefault(packet.PacketType);
@@ -547,7 +545,7 @@ internal sealed class PacketHandler<TIn, TOut>
 			}
 			catch (Exception ex)
 			{
-				//LogRaw.Warn(ex, "Got invalid compressed data.");
+				LogRaw.Warn(ex, "Got invalid compressed data.");
 				return false;
 			}
 		}
@@ -625,7 +623,7 @@ internal sealed class PacketHandler<TIn, TOut>
 			var forwardData = tsCrypt.ProcessInit1<TIn>(packet.Data);
 			if (!forwardData.Ok)
 			{
-				//LogRaw.Debug("Error init: {0}", forwardData.Error);
+				LogRaw.Debug("Error init: {0}", forwardData.Error);
 				return false;
 			}
 			initPacketCheck = null;
@@ -650,7 +648,7 @@ internal sealed class PacketHandler<TIn, TOut>
 			smoothedRtt = TimeSpan.FromTicks((long)((1 - AlphaSmooth) * smoothedRtt.Ticks + AlphaSmooth * sampleRtt.Ticks));
 		smoothedRttVar = TimeSpan.FromTicks((long)((1 - BetaSmooth) * smoothedRttVar.Ticks + BetaSmooth * Math.Abs(sampleRtt.Ticks - smoothedRtt.Ticks)));
 		currentRto = smoothedRtt + Tools.Max(ClockResolution, TimeSpan.FromTicks(4 * smoothedRttVar.Ticks));
-		//LogRtt.Debug("RTT SRTT:{0} RTTVAR:{1} RTO:{2}", smoothedRtt, smoothedRttVar, currentRto);
+		LogRtt.Debug("RTT SRTT:{0} RTTVAR:{1} RTO:{2}", smoothedRtt, smoothedRttVar, currentRto);
 	}
 
 	/// <summary>
@@ -753,8 +751,8 @@ internal sealed class PacketHandler<TIn, TOut>
 		NetworkStats.LogOutPacket(ref packet);
 
 		// DebugToHex is costly and allocates, precheck before logging
-		//if (LogRaw.IsTraceEnabled)
-			//LogRaw.Trace("[O] Raw: {0}", DebugUtil.DebugToHex(packet.Raw));
+		if (LogRaw.IsTraceEnabled)
+			LogRaw.Trace("[O] Raw: {0}", DebugUtil.DebugToHex(packet.Raw));
 
 		try
 		{
@@ -763,13 +761,13 @@ internal sealed class PacketHandler<TIn, TOut>
 			var elap = sw.ElapsedMilliseconds;
 			if (elap > 100)
 			{
-				//LogRaw.Warn("Raw LONG: {0}ms", elap);
+				LogRaw.Warn("Raw LONG: {0}ms", elap);
 			}
 			return R.Ok;
 		}
 		catch (SocketException ex)
 		{
-			//LogRaw.Warn(ex, "Failed to deliver packet (Err:{0})", ex.SocketErrorCode);
+			LogRaw.Warn(ex, "Failed to deliver packet (Err:{0})", ex.SocketErrorCode);
 			return "Socket send error";
 		}
 	}
@@ -778,11 +776,11 @@ internal sealed class PacketHandler<TIn, TOut>
 internal static class PacketHandlerConst
 {
 	public static readonly TSLib.Logging.Logger Log = TSLib.Logging.Logger.Get("TSLib.PacketHandler");
-	// Пер-пакетные логгеры (Rtt/Raw/RawVoice) намеренно выключены: их вызовы на горячем пути
-	// форматируют каждый голосовой пакет и убивают производительность. Не включать.
-	//public static readonly Logger LogRtt = LogManager.GetLogger("TSLib.PacketHandler.Rtt");
-	//public static readonly Logger LogRaw = LogManager.GetLogger("TSLib.PacketHandler.Raw");
-	//public static readonly Logger LogRawVoice = LogManager.GetLogger("TSLib.PacketHandler.Raw.Voice");
+	// Пер-пакетные логгеры горячего пути: вызовы, дампящие пакет/hex на каждый голосовой
+	// пакет, обёрнуты в Is*Enabled — при выключенном уровне ни форматирования, ни аллокаций.
+	public static readonly TSLib.Logging.Logger LogRtt = TSLib.Logging.Logger.Get("TSLib.PacketHandler.Rtt");
+	public static readonly TSLib.Logging.Logger LogRaw = TSLib.Logging.Logger.Get("TSLib.PacketHandler.Raw");
+	public static readonly TSLib.Logging.Logger LogRawVoice = TSLib.Logging.Logger.Get("TSLib.PacketHandler.Raw.Voice");
 	public static readonly TSLib.Logging.Logger LogTimeout = TSLib.Logging.Logger.Get("TSLib.PacketHandler.Timeout");
 
 	/// <summary>Elapsed time since first send timestamp until the connection is considered lost.</summary>

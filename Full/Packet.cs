@@ -133,9 +133,9 @@ internal struct Packet<TDir>
 		{
 			Trace.Fail("Invalid associated Packet Data");
 		}
-#if DEBUG
+		// Синхронизируем массив Header: заголовок обычно пишется сразу в Raw-буфер (см. TsCrypt),
+		// и без этой копии ToString()/дампы LogRaw показывали бы нулевой заголовок.
 		into.CopyTo(Header.AsSpan());
-#endif
 	}
 
 	public void FromHeader()

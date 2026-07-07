@@ -1,7 +1,4 @@
-// Минималистичный логгер TSLib. Намеренно НЕ зависит от NLog (ни пакета, ни namespace):
-// в исходниках TSLib остались закомментированные вызовы вида Log.Debug/Info/Warn/Error —
-// этот логгер повторяет их сигнатуры, поэтому вызовы раскомментируются как есть, а
-// правятся только строки-объявления (Logger Log = Logger.Create();).
+// Минималистичный логгер TSLib без внешних зависимостей.
 //
 // Все события уходят в статический LogSink.OnLog — на него подписывается приложение
 // (MobileTS/Logging/AppLog.cs), которое пишет лог в файл, в кольцевой буфер и во
@@ -9,9 +6,7 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -74,8 +69,8 @@ public static class LogSink {
 }
 
 /// <summary>
-/// Необязательный контекст (например, идентификатор сессии), который проставляется в
-/// каждую запись текущего асинхронного потока. Замена NLog MappedDiagnosticsLogicalContext.
+/// Необязательный контекст (идентификатор соединения, см. Helper.Id), который проставляется
+/// в каждую запись текущего асинхронного потока.
 /// </summary>
 public static class LogContext {
 	private static readonly AsyncLocal<string?> _id = new AsyncLocal<string?>();
@@ -124,15 +119,9 @@ public sealed class Logger {
 	public void Trace(string message, params object?[] args) => Write(LogLevel.Trace, null, message, args);
 	public void Trace(Exception ex, string message, params object?[] args) => Write(LogLevel.Trace, ex, message, args);
 
-	[Conditional("DEBUG")]
-	public void ConditionalTrace(string message, params object?[] args) => Write(LogLevel.Trace, null, message, args);
-
 	// ===================== Debug =====================
 	public void Debug(string message, params object?[] args) => Write(LogLevel.Debug, null, message, args);
 	public void Debug(Exception ex, string message, params object?[] args) => Write(LogLevel.Debug, ex, message, args);
-
-	[Conditional("DEBUG")]
-	public void ConditionalDebug(string message, params object?[] args) => Write(LogLevel.Debug, null, message, args);
 
 	// ===================== Info =====================
 	public void Info(string message, params object?[] args) => Write(LogLevel.Info, null, message, args);
@@ -154,7 +143,7 @@ public sealed class Logger {
 	}
 
 	/// <summary>
-	/// Рендер шаблона сообщения. Поддерживает позиционные «дырки» NLog/string.Format
+	/// Рендер шаблона сообщения. Поддерживает позиционные «дырки» string.Format
 	/// (<c>{0}</c>, <c>{0:F3}</c>) и именованные структурные (<c>{@token}</c>, <c>{$msg}</c>,
 	/// <c>{name}</c>) — последние подставляются по порядку через ToString. Никогда не бросает.
 	/// </summary>

@@ -32,12 +32,11 @@ public sealed class DedicatedTaskScheduler : TaskScheduler, IDisposable
 	private TimeSpan nextTimerDue = TimeSpan.MaxValue;
 	private readonly Stopwatch monotoneClock = Stopwatch.StartNew();
 	private bool IsOwnThread => Thread.CurrentThread == thread;
-#if DEBUG
+	// Диагностика исполнения тасок; активна только при включённом Trace-уровне (см. TryExecuteTaskInternal)
 	private readonly Stack<Task> taskStack = new Stack<Task>();
 	private TimeSpan lastTaskCompleted = TimeSpan.MinValue;
 	private readonly Stopwatch overallWatch = new Stopwatch();
 	private TimeSpan actualRunningTime;
-#endif
 	private DedicatedTaskScheduler()
 	{
 		factory = new TaskFactory(this);
@@ -87,7 +86,7 @@ public sealed class DedicatedTaskScheduler : TaskScheduler, IDisposable
 		var now = GetTimestamp();
 		if (timers.Count == 0)
 		{
-			Log.ConditionalTrace("Quick return 1");
+			Log.Trace("Quick return 1");
 			nextTimerDue = TimeSpan.MaxValue;
 			return Timeout.InfiniteTimeSpan;
 		}
@@ -101,11 +100,11 @@ public sealed class DedicatedTaskScheduler : TaskScheduler, IDisposable
 		//       When we are not in 'inf' state we will just check like normal.
 		if (queue.Count > 0 && now + CombineTimerThreshold < nextTimerDue && nextTimerDue != TimeSpan.MaxValue)
 		{
-			Log.ConditionalTrace("Quick return 2");
+			Log.Trace("Quick return 2");
 			return nextTimerDue - now;
 		}
 
-		Log.ConditionalTrace("Recalc");
+		Log.Trace("Recalc");
 
 		var timeTillNextTimer = TimeSpan.MaxValue;
 		foreach (var timer in timers) // TODO might be modified
@@ -138,17 +137,17 @@ public sealed class DedicatedTaskScheduler : TaskScheduler, IDisposable
 
 	private bool TryExecuteTaskInternal(Task task, bool inline)
 	{
-#if DEBUG
-		//LogExecuteEnter(task, inline);
-#endif
+		// Флаг снимается один раз на вызов: Enter/Exit либо оба выполняются, либо оба нет,
+		// поэтому taskStack не рассинхронизируется при переключении уровня на лету.
+		bool trace = Log.IsTraceEnabled;
+		if (trace)
+			LogExecuteEnter(task, inline);
 		bool ok = TryExecuteTask(task);
-#if DEBUG
-		//LogExecuteExit(task);
-#endif
+		if (trace)
+			LogExecuteExit(task);
 		return ok;
 	}
 
-#if DEBUG
 	private void LogExecuteEnter(Task task, bool inline)
 	{
 		if (taskStack.Count == 0)
@@ -170,19 +169,20 @@ public sealed class DedicatedTaskScheduler : TaskScheduler, IDisposable
 		Log.Trace("Task {0} took {1:F3}ms. Resulted {2}", task.Id, calcTime.TotalMilliseconds, task.Status);
 		lastTaskCompleted = now;
 
-		Trace.Assert(task == taskStack.Pop());
-		/*if (taskStack.Count == 0)
+		var popped = taskStack.Pop();
+		if (popped != task)
+			Log.Warn("Task stack mismatch: expected {0}, got {1}", task.Id, popped.Id);
+		if (taskStack.Count == 0)
 		{
 			var overallTime = overallWatch.Elapsed;
-			Log.Debug("Overall call time: {0:F3} Task Time: {1:F3} Overhead: {2:F3}",
+			Log.Trace("Overall call time: {0:F3} Task Time: {1:F3} Overhead: {2:F3}",
 				overallTime.TotalMilliseconds,
 				actualRunningTime.TotalMilliseconds,
 				(overallTime - actualRunningTime).TotalMilliseconds);
 			if (queue.Count == 0)
 				Log.Trace("Eoq");
-		}*/
+		}
 	}
-#endif
 
 	public override int MaximumConcurrencyLevel => 1;
 
@@ -242,11 +242,11 @@ public sealed class DedicatedTaskScheduler : TaskScheduler, IDisposable
 		if (!IsOwnThread)
 		{
 			var stack = new StackTrace();
-			/*Log.Error("Current call is not scheduled correctly. Sched: {0}, Own: {1}. Stack: {2}",
+			Log.Error("Current call is not scheduled correctly. Sched: {0}, Own: {1}. Stack: {2}",
 				(Current as DedicatedTaskScheduler)?.logId.ToString() ?? $"S{Current.Id}",
 				logId,
 				stack
-			);*/
+			);
 			throw new TaskSchedulerException("Cannot call from an outside thread");
 		}
 	}

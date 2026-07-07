@@ -20,7 +20,6 @@ namespace TSLib;
 /// </summary>
 internal sealed class WaitBlock : IDisposable
 {
-	//private static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
 	private const string NotANotifyBlock = "This waitblock has no dependent notification";
 	private const string NotifyListEmpty = "Depending notification array must not be empty";
 	private const string NotifyDoesNotMatch = "The notification does not match this waitblock";

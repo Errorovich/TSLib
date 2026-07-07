@@ -220,8 +220,8 @@ public sealed partial class TsFullClient : TsBaseFunctions, IAudioActiveProducer
 		case PacketType.Command:
 		case PacketType.CommandLow:
 			var data = packet.Data;
-			//if (Log.IsDebugEnabled)
-				//Log.Debug("[I] {0}", Tools.Utf8Encoder.GetString(packet.Data));
+			if (Log.IsDebugEnabled)
+				Log.Debug("[I] {0}", Tools.Utf8Encoder.GetString(packet.Data));
 			_ = scheduler.Invoke(() =>
 			{
 				if (ctx != context)
@@ -465,7 +465,7 @@ public sealed partial class TsFullClient : TsBaseFunctions, IAudioActiveProducer
 		}
 
 		var message = com.ToString();
-		//Log.Debug("[O] {0}", message); // дамп каждого исходящего сообщения — выключено (горячий путь)
+		Log.Debug("[O] {0}", message);
 		byte[] data = Tools.Utf8Encoder.GetBytes(message);
 		var sendResult = context.PacketHandler.AddOutgoingPacket(data, PacketType.Command);
 		if (!sendResult)
