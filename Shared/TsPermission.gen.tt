@@ -16,7 +16,7 @@
 <#@ import namespace="Microsoft.VisualBasic.FileIO" #>
 <#@ output extension=".cs" #>
 <#
-string declFilePath = Host.ResolvePath("Declarations/Permissions.csv");
+string declFilePath = Host.ResolvePath("../Declarations/Permissions.csv");
 var data = new List<string[]>();
 using (TextFieldParser parser = new TextFieldParser(declFilePath))
 {

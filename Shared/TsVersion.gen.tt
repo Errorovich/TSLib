@@ -17,7 +17,7 @@
 <#@ import namespace="System.Text.RegularExpressions" #>
 <#@ output extension=".cs" #>
 <#
-string declFilePath = Host.ResolvePath("Declarations/Versions.csv");
+string declFilePath = Host.ResolvePath("../Declarations/Versions.csv");
 var data = new List<string[]>();
 using (TextFieldParser parser = new TextFieldParser(declFilePath))
 {

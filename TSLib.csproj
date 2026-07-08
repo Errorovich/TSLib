@@ -37,7 +37,7 @@
   <ItemGroup>
     <None Include="ReSpeak.png" Pack="true" PackagePath="\" />
     <None Include="Full\Book\BookParser.ttinclude" />
-    <None Include="ErrorParser.ttinclude" />
+    <None Include="Shared\ErrorParser.ttinclude" />
     <None Include="Full\Book\M2BParser.ttinclude" />
     <None Include="Messages\MessageParser.ttinclude" />
     <None Include="NotificationUtil.ttinclude" />
@@ -50,7 +50,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Book.gen.cs</LastGenOutput>
     </None>
-    <None Update="TsErrorCode.gen.tt">
+    <None Update="Shared\TsErrorCode.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TsErrorCode.gen.cs</LastGenOutput>
     </None>
@@ -62,7 +62,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Messages.gen.cs</LastGenOutput>
     </None>
-    <None Update="TsPermission.gen.tt">
+    <None Update="Shared\TsPermission.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TsPermission.gen.cs</LastGenOutput>
     </None>
@@ -74,15 +74,15 @@
       <LastGenOutput>TsQueryClient.gen.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
     </None>
-    <None Update="Types.gen.tt">
+    <None Update="Shared\Types.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Types.gen.cs</LastGenOutput>
     </None>
-    <None Update="TsVersion.gen.tt">
+    <None Update="Shared\TsVersion.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TsVersion.gen.cs</LastGenOutput>
     </None>
-    <None Update="TsBaseFunctions.gen.tt">
+    <None Update="ClientBase\TsBaseFunctions.gen.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>TsBaseFunctions.gen.cs</LastGenOutput>
     </None>
@@ -103,7 +103,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Book.gen.tt</DependentUpon>
     </Compile>
-    <Compile Update="TsErrorCode.gen.cs">
+    <Compile Update="Shared\TsErrorCode.gen.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TsErrorCode.gen.tt</DependentUpon>
@@ -118,12 +118,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Messages.gen.tt</DependentUpon>
     </Compile>
-    <Compile Update="TsPermission.gen.cs">
+    <Compile Update="Shared\TsPermission.gen.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TsPermission.gen.tt</DependentUpon>
     </Compile>
-    <Compile Update="TsVersion.gen.cs">
+    <Compile Update="Shared\TsVersion.gen.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TsVersion.gen.tt</DependentUpon>
@@ -133,12 +133,12 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="TsBaseFunctions.gen.cs">
+    <Compile Update="ClientBase\TsBaseFunctions.gen.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>TsBaseFunctions.gen.tt</DependentUpon>
     </Compile>
-    <Compile Update="Types.gen.cs">
+    <Compile Update="Shared\Types.gen.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Types.gen.tt</DependentUpon>

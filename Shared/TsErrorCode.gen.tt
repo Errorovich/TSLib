@@ -11,7 +11,7 @@
 <#@ template debug="false" hostspecific="true" language="C#" #>
 <#@ include file="ErrorParser.ttinclude" once="true" #>
 <#@ output extension=".cs" #>
-<# var errors = ParseErrors(Host.ResolvePath("Declarations/Errors.csv")); #>
+<# var errors = ParseErrors(Host.ResolvePath("../Declarations/Errors.csv")); #>
 
 namespace TSLib;
 
