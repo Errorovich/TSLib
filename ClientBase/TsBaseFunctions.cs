@@ -13,11 +13,13 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using TSLib.Commands;
+using TSLib.Crypto;
 using TSLib.Full.Book;
 using TSLib.Messages;
+using TSLib.Shared;
 using CmdR = System.Threading.Tasks.Task<System.E<TSLib.Messages.CommandError>>;
 
-namespace TSLib;
+namespace TSLib.ClientBase;
 
 public delegate void NotifyEventHandler<in TEventArgs>(object sender, IEnumerable<TEventArgs> e) where TEventArgs : INotification;
 
@@ -64,7 +66,7 @@ public abstract partial class TsBaseFunctions : IDisposable
 	private string? GenPassword(string? password)
 	{
 		if (ClientType == ClientType.Full && password != null)
-			return Full.TsCrypt.HashPassword(password);
+			return TsCrypt.HashPassword(password);
 		else
 			return password;
 	}

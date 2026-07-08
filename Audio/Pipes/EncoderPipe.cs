@@ -9,8 +9,9 @@
 
 using System;
 using TSLib.Audio.Opus;
+using TSLib.Shared;
 
-namespace TSLib.Audio;
+namespace TSLib.Audio.Pipes;
 
 public class EncoderPipe : IAudioPipe, IDisposable, ISampleInfo
 {

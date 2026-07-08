@@ -11,8 +11,9 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using TSLib.Audio;
+using TSLib.Shared;
 
-namespace TSLib.Full;
+namespace TSLib.Full.Transport;
 
 /// <summary>
 /// Byte-фрейминг голосовых пакетов (Voice/VoiceWhisper): сборка и отправка исходящих,

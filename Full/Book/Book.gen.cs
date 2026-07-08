@@ -12,6 +12,7 @@
 
 
 using System.Collections.Generic;
+using TSLib.Shared;
 
 #pragma warning disable CS8019 // Ignore unused imports
 using i8  = System.SByte;
@@ -33,13 +34,13 @@ using DurationMilliseconds = System.TimeSpan;
 using DurationMillisecondsFloat = System.TimeSpan;
 using SocketAddr = System.String;
 using IpAddr = System.String;
-using Ts3ErrorCode = TSLib.TsErrorCode;
-using Ts3Permission = TSLib.TsPermission;
+using Ts3ErrorCode = TSLib.Shared.TsErrorCode;
+using Ts3Permission = TSLib.Shared.TsPermission;
 
 using IconHash = System.Int32;
 using IconId = System.Int32;
 using ConnectionId = System.UInt32;
-using EccKeyPubP256 = TSLib.Uid;
+using EccKeyPubP256 = TSLib.Shared.Uid;
 #pragma warning restore CS8019
 
 #nullable enable

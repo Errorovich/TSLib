@@ -15,9 +15,11 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using TSLib.Helper;
-using static TSLib.Full.PacketHandlerConst;
+using TSLib.Crypto;
+using TSLib.Shared;
+using static TSLib.Full.Transport.PacketHandlerConst;
 
-namespace TSLib.Full;
+namespace TSLib.Full.Transport;
 
 internal sealed class PacketHandler<TIn, TOut>
 {

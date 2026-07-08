@@ -10,8 +10,9 @@
 using System;
 using System.Collections.Generic;
 using TSLib.Audio.Opus;
+using TSLib.Shared;
 
-namespace TSLib.Audio;
+namespace TSLib.Audio.Pipes;
 
 public class DecoderPipe : IAudioPipe, IDisposable, ISampleInfo {
     public bool Active => OutStream?.Active ?? false;

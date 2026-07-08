@@ -11,6 +11,7 @@ using System;
 using System.Linq;
 using TSLib.Helper;
 using TSLib.Messages;
+using TSLib.Shared;
 using SocketAddr = System.String;
 
 namespace TSLib.Full.Book;

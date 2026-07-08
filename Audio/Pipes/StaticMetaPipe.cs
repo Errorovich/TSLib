@@ -10,8 +10,9 @@
 using System;
 using System.Collections.Generic;
 using TSLib.Helper;
+using TSLib.Shared;
 
-namespace TSLib.Audio;
+namespace TSLib.Audio.Pipes;
 
 public class StaticMetaPipe : IAudioPipe
 {

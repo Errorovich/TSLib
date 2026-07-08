@@ -13,9 +13,27 @@ dotnet build TSLib.csproj
 
 `--recursive` обязателен: декларации протокола ([ReSpeak/tsdeclarations](https://github.com/ReSpeak/tsdeclarations)) подключены сабмодулем в `Declarations/`.
 
+## Структура модулей
+
+Папка = неймспейс (`Shared/` → `TSLib.Shared` и т.д.); исключения: `Helper/R.cs` намеренно объявляет результат-типы `R`/`E` в `namespace System`.
+
+| Модуль | Содержимое |
+|---|---|
+| `Shared/` | Пассивные типы протокола: ID-структуры (`Types`), enum'ы (`TsEnums`), генерённые таблицы (`TsErrorCode`, `TsPermission`, `TsVersion`), `ConnectionData`, `DisconnectEventArgs`, `TsDnsResolver`, примитивы проводного формата `TsString` (escape/unescape) и `TsConst` (лимиты сервера) |
+| `ClientBase/` | Общий каркас обоих клиентов: `TsBaseFunctions` (база full/query + генерённые обёртки команд), `MessageProcessor`, `WaitBlock`, `EventDispatcher`, `LazyNotification` |
+| `Crypto/` | Идентичность и криптография: `TsCrypt`, `IdentityData`, `License` (сюда же ляжет авторизация TS5/TS6) |
+| `Commands/` | Исходящее направление (клиент → сервер): построитель `TsCommand` и виды параметров |
+| `Messages/` | Входящее направление (сервер → клиент): `Deserializer`, генерённые классы уведомлений/ответов |
+| `Full/` | Полный (голосовой) клиент: `TsFullClient`, `ConnectionContext`, `FullClientHandshake`; `Full/Transport/` — пакетный уровень (`Packet`, `PacketHandler`, `VoicePacket`, `QuickerLz`…); `Full/Book/` — реплицируемое состояние сервера |
+| `Query/` | Query-клиент (`TsQueryClient`) |
+| `Audio/` | Аудио-пайплайн: интерфейсы и `Audio/Pipes/` (сегменты), `Audio/Opus/` (кодек) |
+| `Helper/`, `Scheduler/`, `Logging/` | Утилиты, планировщик (`DedicatedTaskScheduler`), логирование |
+
+Известная «восходящая» связь: `Crypto/TsCrypt` шифрует/дешифрует `Packet<TDir>` из `Full.Transport` (двунаправленная связка крипты и пакетного уровня); план — распилить `TsCrypt` на статические утилиты идентичности и per-connection пакетный шифр.
+
 ## Кодогенерация (T4)
 
-Часть исходников генерируется T4-шаблонами из `Declarations/`; результат закоммичен, поэтому для обычной сборки перегенерация не нужна. Сгенерированные файлы носят суффикс `.gen.cs` и лежат **рядом со своим `.tt` в модуле по смыслу** (`Full/Book/Book.gen.cs`, `Messages/Messages.gen.cs`, `TsErrorCode.gen.cs` в корне и т.д.); парсеры деклараций (`.ttinclude`) — тоже по модулям (`Messages/MessageParser.ttinclude`, `Full/Book/BookParser.ttinclude`, общие `Util`/`NotificationUtil`/`ErrorParser` — в корне). **Не редактируйте сгенерированные `.cs` руками** — правьте `.tt`/`.ttinclude` и перегенерируйте. После обновления сабмодуля `Declarations` перегенерация обязательна.
+Часть исходников генерируется T4-шаблонами из `Declarations/`; результат закоммичен, поэтому для обычной сборки перегенерация не нужна. Сгенерированные файлы носят суффикс `.gen.cs` и лежат **рядом со своим `.tt` в модуле по смыслу** (`Shared/Types.gen.cs`, `Shared/TsErrorCode.gen.cs`, `ClientBase/TsBaseFunctions.gen.cs`, `Messages/Messages.gen.cs`, `Full/Book/Book.gen.cs` и т.д.) — пара `.tt`+`.gen.cs` обязана жить в одной папке (`LastGenOutput`/`DependentUpon` в csproj заданы голыми именами). Парсеры деклараций (`.ttinclude`) — тоже по модулям (`Messages/MessageParser.ttinclude`, `Full/Book/BookParser.ttinclude`, `Shared/ErrorParser.ttinclude`; общие `Util`/`NotificationUtil` — в корне). Неймспейс генерённого кода зашит в шаблоне, а `include`/`Host.ResolvePath` — относительные, поэтому при переносе `.tt` правьте и пути внутри него. **Не редактируйте сгенерированные `.cs` руками** — правьте `.tt`/`.ttinclude` и перегенерируйте. После обновления сабмодуля `Declarations` перегенерация обязательна.
 
 Как перегенерировать (любой вариант):
 

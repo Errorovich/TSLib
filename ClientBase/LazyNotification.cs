@@ -9,7 +9,7 @@
 
 using TSLib.Messages;
 
-namespace TSLib;
+namespace TSLib.ClientBase;
 
 public readonly struct LazyNotification
 {

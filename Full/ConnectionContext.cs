@@ -10,6 +10,9 @@
 using System;
 using System.Threading.Tasks;
 using TSLib.Messages;
+using TSLib.Crypto;
+using TSLib.Full.Transport;
+using TSLib.Shared;
 
 namespace TSLib.Full;
 

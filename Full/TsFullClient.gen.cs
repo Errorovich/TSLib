@@ -14,6 +14,7 @@
 
 
 using System;
+using TSLib.ClientBase;
 using TSLib.Helper;
 using TSLib.Messages;
 

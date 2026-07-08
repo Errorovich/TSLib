@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace TSLib.Audio;
+namespace TSLib.Audio.Pipes;
 
 public class PassiveMergePipe : IAudioPassiveProducer, ICollection<IAudioPassiveProducer>
 {

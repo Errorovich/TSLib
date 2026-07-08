@@ -10,6 +10,8 @@
 using System;
 using TSLib.Commands;
 using TSLib.Messages;
+using TSLib.Shared;
+using TSLib.Crypto;
 
 namespace TSLib.Full;
 

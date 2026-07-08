@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using TSLib.Helper;
+using TSLib.Shared;
 
 namespace TSLib.Commands;
 

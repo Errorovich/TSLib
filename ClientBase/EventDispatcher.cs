@@ -12,7 +12,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using TSLib.Helper;
 
-namespace TSLib;
+namespace TSLib.ClientBase;
 
 internal static class EventDispatcherHelper
 {

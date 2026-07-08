@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace TSLib;
+namespace TSLib.Shared;
 
 public static class TsTypes
 {

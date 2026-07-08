@@ -20,7 +20,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TSLib.Helper;
 
-namespace TSLib;
+namespace TSLib.Shared;
 
 /// <summary>Provides methods to resolve TSDNS, SRV redirects and nicknames</summary>
 public static class TsDnsResolver

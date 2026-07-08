@@ -15,9 +15,10 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using TSLib.Messages;
+using TSLib.Shared;
 using IOFileInfo = System.IO.FileInfo;
 
-namespace TSLib;
+namespace TSLib.ClientBase;
 
 partial class TsBaseFunctions
 {

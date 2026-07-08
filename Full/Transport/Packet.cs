@@ -12,8 +12,9 @@ using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using TSLib.Helper;
+using TSLib.Crypto;
 
-namespace TSLib.Full;
+namespace TSLib.Full.Transport;
 
 internal struct Packet<TDir>
 {

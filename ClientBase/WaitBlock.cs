@@ -10,10 +10,11 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using TSLib.Full;
 using TSLib.Messages;
+using TSLib.Full.Transport;
+using TSLib.Shared;
 
-namespace TSLib;
+namespace TSLib.ClientBase;
 
 /// <summary>
 /// Synchronizes data between the receiving packet Thread and the waiting dispatcher Thread.

@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using TSLib.Helper;
 using TSLib.Messages;
 
-namespace TSLib;
+namespace TSLib.ClientBase;
 
 internal abstract class BaseMessageProcessor
 {

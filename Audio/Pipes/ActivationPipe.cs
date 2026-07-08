@@ -1,6 +1,6 @@
 using System;
 
-namespace TSLib.Audio;
+namespace TSLib.Audio.Pipes;
 
 /// <summary>
 /// Базовый пайп-«воротца» с переключателем режима. Когда <see cref="Enabled"/> = false —

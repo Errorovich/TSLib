@@ -9,7 +9,7 @@
 
 using System;
 
-namespace TSLib.Full;
+namespace TSLib.Full.Transport;
 
 public sealed class GenerationWindow
 {

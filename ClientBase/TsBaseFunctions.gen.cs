@@ -14,9 +14,10 @@ using System;
 using System.Threading.Tasks;
 using TSLib.Commands;
 using TSLib.Messages;
+using TSLib.Shared;
 
 #nullable enable
-namespace TSLib;
+namespace TSLib.ClientBase;
 
 partial class TsBaseFunctions
 {

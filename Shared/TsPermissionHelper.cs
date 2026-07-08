@@ -12,7 +12,7 @@ using TSLib.Commands;
 using TSLib.Helper;
 using TSLib.Messages;
 
-namespace TSLib;
+namespace TSLib.Shared;
 
 public static partial class TsPermissionHelper
 {

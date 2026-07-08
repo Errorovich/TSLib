@@ -11,7 +11,7 @@ using System;
 using System.Threading;
 using TSLib.Helper;
 
-namespace TSLib.Audio;
+namespace TSLib.Audio.Pipes;
 
 public class PreciseTimedPipe : IAudioActiveConsumer, IAudioActiveProducer, IDisposable
 {

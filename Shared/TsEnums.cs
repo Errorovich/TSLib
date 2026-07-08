@@ -9,7 +9,7 @@
 
 using System;
 
-namespace TSLib;
+namespace TSLib.Shared;
 
 /*
 	* Most important Id datatypes:

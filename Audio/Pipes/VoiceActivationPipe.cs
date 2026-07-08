@@ -1,6 +1,6 @@
 using System;
 
-namespace TSLib.Audio;
+namespace TSLib.Audio.Pipes;
 
 /// <summary>
 /// Активация передачи по голосу (VAD): пропускает звук пока громкость выше порога,

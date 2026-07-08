@@ -13,7 +13,7 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using TSLib.Helper;
 
-namespace TSLib.Full;
+namespace TSLib.Crypto;
 
 public class Licenses
 {

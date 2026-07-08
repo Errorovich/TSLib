@@ -8,6 +8,7 @@
 // program. If not, see <https://opensource.org/licenses/OSL-3.0>.
 
 using System.Collections.Generic;
+using TSLib.Shared;
 
 namespace TSLib.Audio;
 

@@ -18,6 +18,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 
 using System.Collections.Generic;
+using TSLib.Shared;
 
 <#= ConversionSet #>
 

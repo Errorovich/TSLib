@@ -7,7 +7,7 @@
 // You should have received a copy of the Open Software License along with this
 // program. If not, see <https://opensource.org/licenses/OSL-3.0>.
 
-namespace TSLib.Commands;
+namespace TSLib.Shared;
 
 public class TsConst
 {

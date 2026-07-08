@@ -7,9 +7,9 @@
 // You should have received a copy of the Open Software License along with this
 // program. If not, see <https://opensource.org/licenses/OSL-3.0>.
 
-using TSLib.Full;
+using TSLib.Crypto;
 
-namespace TSLib;
+namespace TSLib.Shared;
 
 public partial record struct Uid
 {

@@ -42,7 +42,7 @@ string BuildToFld(string build)
 }
 #>
 
-namespace TSLib;
+namespace TSLib.Shared;
 
 partial class TsVersionSigned
 {

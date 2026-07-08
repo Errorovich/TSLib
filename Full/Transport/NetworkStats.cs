@@ -13,7 +13,7 @@ using System.Linq;
 using TSLib.Commands;
 using TSLib.Helper;
 
-namespace TSLib.Full;
+namespace TSLib.Full.Transport;
 
 // TODO include udp/ip header size to get correct values
 /// <summary>Provides connection stats by logging packets.</summary>

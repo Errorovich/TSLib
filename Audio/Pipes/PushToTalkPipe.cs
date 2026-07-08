@@ -1,6 +1,6 @@
 using System;
 
-namespace TSLib.Audio;
+namespace TSLib.Audio.Pipes;
 
 /// <summary>
 /// Активация передачи по кнопке (push-to-talk): пропускает звук только пока

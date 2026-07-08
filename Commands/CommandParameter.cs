@@ -11,6 +11,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using TSLib.Helper;
+using TSLib.Shared;
 
 namespace TSLib.Commands;
 

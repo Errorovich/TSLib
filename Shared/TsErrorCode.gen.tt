@@ -13,7 +13,7 @@
 <#@ output extension=".cs" #>
 <# var errors = ParseErrors(Host.ResolvePath("../Declarations/Errors.csv")); #>
 
-namespace TSLib;
+namespace TSLib.Shared;
 
 // Source: http://forum.teamspeak.com/threads/102276-Server-query-error-id-list
 public enum TsErrorCode : uint

@@ -11,6 +11,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TSLib.ClientBase;
+using TSLib.Shared;
 
 namespace TSLib.Messages;
 

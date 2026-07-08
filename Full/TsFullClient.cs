@@ -19,6 +19,10 @@ using TSLib.Full.Book;
 using TSLib.Helper;
 using TSLib.Messages;
 using TSLib.Scheduler;
+using TSLib.ClientBase;
+using TSLib.Crypto;
+using TSLib.Full.Transport;
+using TSLib.Shared;
 using CmdR = System.Threading.Tasks.Task<System.E<TSLib.Messages.CommandError>>;
 
 namespace TSLib.Full;

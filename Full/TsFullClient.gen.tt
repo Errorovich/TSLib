@@ -17,6 +17,7 @@
 <#@ import namespace="System.Collections.Generic" #>
 
 using System;
+using TSLib.ClientBase;
 using TSLib.Helper;
 using TSLib.Messages;
 

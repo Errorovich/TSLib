@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using TSLib.Shared;
 
 namespace TSLib.Commands;
 

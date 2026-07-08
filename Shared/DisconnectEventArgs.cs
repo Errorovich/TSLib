@@ -10,7 +10,7 @@
 using System;
 using TSLib.Messages;
 
-namespace TSLib;
+namespace TSLib.Shared;
 
 public class DisconnectEventArgs : EventArgs
 {

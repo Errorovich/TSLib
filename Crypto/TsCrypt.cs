@@ -26,8 +26,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using TSLib.Commands;
 using TSLib.Helper;
+using TSLib.Full.Transport;
+using TSLib.Shared;
 
-namespace TSLib.Full;
+namespace TSLib.Crypto;
 
 /// <summary>Provides all cryptographic functions needed for the low- and high level TeamSpeak protocol usage.</summary>
 public sealed class TsCrypt

@@ -23,6 +23,7 @@ var genmsg = Messages.Parse(Host.ResolvePath("../../Declarations/Messages.toml")
 var genm2b = M2BDeclarations.Parse(Host.ResolvePath("../../Declarations/MessagesToBook.toml"), genmsg, genbook);
 #>
 using TSLib.Messages;
+using TSLib.Shared;
 
 <#= ConversionSet #>
 

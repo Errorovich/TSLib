@@ -8,6 +8,7 @@
 // program. If not, see <https://opensource.org/licenses/OSL-3.0>.
 
 using System;
+using TSLib.Audio.Pipes;
 
 namespace TSLib.Audio;
 

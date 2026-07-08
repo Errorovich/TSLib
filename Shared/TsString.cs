@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using TSLib.Helper;
 
-namespace TSLib.Commands;
+namespace TSLib.Shared;
 
 public static class TsString
 {

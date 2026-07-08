@@ -10,7 +10,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace TSLib.Full;
+namespace TSLib.Full.Transport;
 
 /// <summary>Provides a ring queue with packet offset and direct item access functionality.</summary>
 /// <typeparam name="T">Item type</typeparam>

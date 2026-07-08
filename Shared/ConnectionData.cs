@@ -8,10 +8,10 @@
 // program. If not, see <https://opensource.org/licenses/OSL-3.0>.
 
 using System;
-using TSLib.Full;
 using TSLib.Helper;
+using TSLib.Crypto;
 
-namespace TSLib;
+namespace TSLib.Shared;
 
 /// <summary>Used to pass basic connecting information. (Usually for the query)</summary>
 public class ConnectionData

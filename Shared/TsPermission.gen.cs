@@ -10,7 +10,7 @@
 
 using TSLib.Helper;
 
-namespace TSLib;
+namespace TSLib.Shared;
 
 // Source: https://www.tsviewer.com/index.php?page=faq&id=12&newlanguage=en
 public enum TsPermission

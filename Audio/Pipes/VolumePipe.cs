@@ -10,7 +10,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace TSLib.Audio;
+namespace TSLib.Audio.Pipes;
 
 public class VolumePipe : IAudioPipe
 {

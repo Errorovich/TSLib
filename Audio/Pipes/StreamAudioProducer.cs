@@ -9,7 +9,7 @@
 
 using System.IO;
 
-namespace TSLib.Audio;
+namespace TSLib.Audio.Pipes;
 
 public class StreamAudioProducer : IAudioPassiveProducer
 {

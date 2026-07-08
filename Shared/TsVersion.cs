@@ -9,9 +9,9 @@
 
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using TSLib.Full;
+using TSLib.Crypto;
 
-namespace TSLib;
+namespace TSLib.Shared;
 
 /// <summary>Describes a version tuple of version and platform.</summary>
 public class TsVersion

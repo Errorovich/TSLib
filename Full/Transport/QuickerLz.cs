@@ -13,7 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 
-namespace TSLib.Full;
+namespace TSLib.Full.Transport;
 
 /// <summary>An alternative QuickLZ compression implementation for C#.</summary>
 public static class QuickerLz

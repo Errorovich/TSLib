@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using TSLib.Shared;
 
-namespace TSLib.Audio;
+namespace TSLib.Audio.Pipes;
 
 /// <summary>
 /// Прозрачный наблюдатель потока воспроизведения: отслеживает по <see cref="Meta.In"/>,

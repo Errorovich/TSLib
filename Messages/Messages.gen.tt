@@ -18,8 +18,8 @@
 using System;
 using System.Collections.Generic;
 using System.Buffers.Text;
-using TSLib.Commands;
 using TSLib.Helper;
+using TSLib.Shared;
 
 <#= ConversionSet #>
 

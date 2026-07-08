@@ -10,8 +10,9 @@
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Math.EC;
 using System;
+using TSLib.Shared;
 
-namespace TSLib.Full;
+namespace TSLib.Crypto;
 
 /// <summary>Represents the identity of a user.
 /// To generate new identities use <see cref="TsCrypt.GenerateNewIdentity"/>.
