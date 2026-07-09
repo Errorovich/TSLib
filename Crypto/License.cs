@@ -12,6 +12,7 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using TSLib.Helper;
+using TSLib.Shared;
 
 namespace TSLib.Crypto;
 
@@ -97,12 +98,12 @@ public abstract class LicenseBlock
 			break;
 
 		case 2:
-			if (!Enum.IsDefined(typeof(ServerLicenseType), data[42]))
+			if (!Enum.IsDefined((LicenseType)data[42]))
 				return $"Unknown license type {data[42]}";
 			result = ReadNullString(data.Slice(47));
 			if (!result.Ok) return result.Error;
 			nullStr = result.Value;
-			block = new ServerLicenseBlock(result.Value.str, (ServerLicenseType)data[42]);
+			block = new ServerLicenseBlock(result.Value.str, (LicenseType)data[42]);
 			read = 6 + nullStr.read;
 			break;
 
@@ -203,9 +204,9 @@ public class ServerLicenseBlock : LicenseBlock
 {
 	public override ChainBlockType Type => ChainBlockType.Server;
 	public string Issuer { get; }
-	public ServerLicenseType LicenseType { get; }
+	public LicenseType LicenseType { get; }
 
-	public ServerLicenseBlock(string issuer, ServerLicenseType licenseType)
+	public ServerLicenseBlock(string issuer, LicenseType licenseType)
 	{
 		Issuer = issuer;
 		LicenseType = licenseType;
@@ -231,18 +232,3 @@ public enum ChainBlockType : byte
 }
 
 #endregion
-
-public enum ServerLicenseType : byte
-{
-	None = 0,
-	Offline,
-	Sdk,
-	SdkOffline,
-	Npl,
-	Athp,
-	Aal,
-	Default,
-	Gamer,
-	Sponsorship,
-	Commercial,
-}

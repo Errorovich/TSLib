@@ -114,16 +114,28 @@ public enum GroupWhisperTarget : byte
 
 public enum LicenseType : ushort
 {
-	/// <summary>No licence</summary>
+	///<summary>No licence</summary>
 	NoLicense = 0,
-	///<summary>Authorised TeamSpeak Host Provider License (ATHP)</summary>
-	Athp = 1,
-	///<summary>Offline/LAN License</summary>
-	Lan = 2,
+	///<summary>Offline/LAN license</summary>
+	Offline = 1,
+	///<summary>TeamSpeak SDK license</summary>
+	Sdk = 2,
+	///<summary>TeamSpeak SDK offline license</summary>
+	SdkOffline = 3,
 	///<summary>Non-Profit License (NPL)</summary>
-	Npl = 3,
-	///<summary>Unknown License</summary>
-	Unknown = 4,
+	Npl = 4,
+	///<summary>Authorised TeamSpeak Host Provider License (ATHP)</summary>
+	Athp = 5,
+	///<summary>Annual activation license (AAL)</summary>
+	Aal = 6,
+	///<summary>Default license with 32 slots</summary>
+	Default = 7,
+	///<summary>Gamer license</summary>
+	Gamer = 8,
+	///<summary>Licenses sponsored by TeamSpeak</summary>
+	Sponsorship = 9,
+	///<summary>For use inside corporates</summary>
+	Commercial = 10,
 }
 
 // http://media.teamspeak.com/ts3_literature/TeamSpeak%203%20Server%20Query%20Manual.pdf
