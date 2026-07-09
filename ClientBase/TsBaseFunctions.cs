@@ -14,7 +14,6 @@ using System.Net;
 using System.Threading.Tasks;
 using TSLib.Commands;
 using TSLib.Crypto;
-using TSLib.Full.Book;
 using TSLib.Messages;
 using TSLib.Shared;
 using CmdR = System.Threading.Tasks.Task<System.E<TSLib.Messages.CommandError>>;

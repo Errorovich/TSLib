@@ -15,7 +15,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using TSLib.Commands;
-using TSLib.Full.Book;
 using TSLib.Helper;
 using TSLib.Messages;
 using TSLib.ClientBase;
@@ -31,6 +30,7 @@ public sealed partial class TsQueryClient : TsBaseFunctions
 	private StreamReader? tcpReader;
 	private StreamWriter? tcpWriter;
 	private CancellationTokenSource? cts;
+	private bool disposed;
 	private readonly SyncMessageProcessor msgProc;
 	private readonly IEventDispatcher dispatcher;
 	private readonly Pipe dataPipe = new Pipe();
@@ -160,27 +160,44 @@ public sealed partial class TsQueryClient : TsBaseFunctions
 		await reader.CompleteAsync();
 	}
 
-	public override Task<R<T[], CommandError>> Send<T>(TsCommand com)
+	// ExpectResponse здесь сознательно игнорируется: в query-протоколе сервер отвечает
+	// error-строкой на каждую команду, а корреляция ответов — FIFO. Пропуск WaitBlock
+	// сдвинул бы очередь, и ответы начали бы матчиться с чужими командами.
+	public override async Task<R<T[], CommandError>> Send<T>(TsCommand com)
 	{
+		// async + await обязательны: wb должен жить до прихода ответа,
+		// иначе using диспознет его сразу при возврате Task и вернётся ConnectionClosed.
 		using var wb = new WaitBlock(msgProc.Deserializer);
 		lock (sendQueueLock)
 		{
+			if (disposed || !tcpClient.Connected)
+				return CommandError.ConnectionClosed;
 			msgProc.EnqueueRequest(wb);
-			SendRaw(com.ToString());
+			if (!SendRaw(com.ToString()))
+				return CommandError.ConnectionClosed;
 		}
 
-		return wb.WaitForMessageAsync<T>();
+		return await wb.WaitForMessageAsync<T>();
 	}
 
 	public override Task<R<T[], CommandError>> SendHybrid<T>(TsCommand com, NotificationType type)
 		=> Send<T>(com);
 
-	private void SendRaw(string data)
+	private bool SendRaw(string data)
 	{
 		if (!tcpClient.Connected)
-			return;
-		tcpWriter?.WriteLine(data);
-		tcpWriter?.Flush();
+			return false;
+		try
+		{
+			tcpWriter?.WriteLine(data);
+			tcpWriter?.Flush();
+			return true;
+		}
+		catch (Exception ex) when (ex is IOException or ObjectDisposedException)
+		{
+			Log.Debug("Failed to send raw data: {0}", ex.Message);
+			return false;
+		}
 	}
 
 	#region QUERY SPECIFIC COMMANDS
@@ -269,10 +286,17 @@ public sealed partial class TsQueryClient : TsBaseFunctions
 	{
 		lock (sendQueueLock)
 		{
+			if (disposed)
+				return;
+			disposed = true;
+
+			cts?.Cancel();
+			cts = null;
 			tcpWriter?.Dispose();
 			tcpWriter = null;
 			tcpReader?.Dispose();
 			tcpReader = null;
+			tcpClient.Dispose();
 			msgProc.DropQueue();
 			dispatcher.Dispose();
 		}

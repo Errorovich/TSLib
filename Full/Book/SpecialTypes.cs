@@ -24,13 +24,6 @@ public enum MaxClientsKind
 	Limited,
 }
 
-public enum ChannelType
-{
-	Temporary,
-	SemiPermanent,
-	Permanent,
-}
-
 public struct TalkPowerRequest
 {
 	public DateTime Time { get; internal set; }

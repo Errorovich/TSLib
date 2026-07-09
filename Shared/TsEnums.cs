@@ -182,6 +182,13 @@ public enum Codec : byte
 	Raw = 127,
 }
 
+public enum ChannelType
+{
+	Temporary,
+	SemiPermanent,
+	Permanent,
+}
+
 public enum CodecEncryptionMode
 {
 	///<summary>Configure per channel.</summary>
