@@ -10,7 +10,6 @@
 using System;
 using System.Threading.Tasks;
 using TSLib.Messages;
-using TSLib.Crypto;
 using TSLib.Full.Transport;
 using TSLib.Shared;
 
@@ -26,7 +25,7 @@ internal class ConnectionContext
 	private uint returnCode;
 
 	public Reason? ExitReason { get; set; }
-	public TsCrypt TsCrypt { get; }
+	public PacketCipher PacketCipher { get; }
 	public PacketHandler<S2C, C2S> PacketHandler { get; }
 	public ConnectionDataFull ConnectionDataFull { get; }
 
@@ -42,8 +41,8 @@ internal class ConnectionContext
 		// option for a more consistent processing order and better predictable behaviour.
 		ConnectEvent = new TaskCompletionSource<E<CommandError>>(TaskCreationOptions.RunContinuationsAsynchronously);
 		DisconnectEvent = new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
-		TsCrypt = new TsCrypt(connectionDataFull.Identity);
-		PacketHandler = new PacketHandler<S2C, C2S>(TsCrypt, connectionDataFull.LogId);
+		PacketCipher = new PacketCipher(connectionDataFull.Identity);
+		PacketHandler = new PacketHandler<S2C, C2S>(PacketCipher, connectionDataFull.LogId);
 		ConnectionDataFull = connectionDataFull;
 	}
 

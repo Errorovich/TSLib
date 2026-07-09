@@ -12,7 +12,6 @@ using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using TSLib.Helper;
-using TSLib.Crypto;
 
 namespace TSLib.Full.Transport;
 
@@ -81,7 +80,7 @@ internal struct Packet<TDir>
 
 	public Packet(ReadOnlySpan<byte> data, PacketType packetType, ushort packetId, uint generationId) : this()
 	{
-		Raw = new byte[data.Length + HeaderLength + TsCrypt.MacLen];
+		Raw = new byte[data.Length + HeaderLength + PacketCipher.MacLen];
 		Header = new byte[HeaderLength];
 		Data = data.ToArray();
 		PacketType = packetType;
@@ -92,7 +91,7 @@ internal struct Packet<TDir>
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static Packet<TDir>? FromRaw(ReadOnlySpan<byte> raw)
 	{
-		if (raw.Length < HeaderLength + TsCrypt.MacLen)
+		if (raw.Length < HeaderLength + PacketCipher.MacLen)
 			return null;
 		var packet = new Packet<TDir>
 		{
@@ -134,7 +133,7 @@ internal struct Packet<TDir>
 		{
 			Trace.Fail("Invalid associated Packet Data");
 		}
-		// Синхронизируем массив Header: заголовок обычно пишется сразу в Raw-буфер (см. TsCrypt),
+		// Синхронизируем массив Header: заголовок обычно пишется сразу в Raw-буфер (см. PacketCipher),
 		// и без этой копии ToString()/дампы LogRaw показывали бы нулевой заголовок.
 		into.CopyTo(Header.AsSpan());
 	}
@@ -145,15 +144,15 @@ internal struct Packet<TDir>
 		var rawSpan = Raw.AsSpan();
 		if (typeof(TDir) == typeof(S2C))
 		{
-			PacketId = BinaryPrimitives.ReadUInt16BigEndian(rawSpan.Slice(TsCrypt.MacLen));
-			PacketTypeFlagged = Raw[TsCrypt.MacLen + 2];
+			PacketId = BinaryPrimitives.ReadUInt16BigEndian(rawSpan.Slice(PacketCipher.MacLen));
+			PacketTypeFlagged = Raw[PacketCipher.MacLen + 2];
 		}
 		else if (typeof(TDir) == typeof(C2S))
 		{
 			var ext = new C2S();
-			PacketId = BinaryPrimitives.ReadUInt16BigEndian(rawSpan.Slice(TsCrypt.MacLen));
-			ext.ClientId = BinaryPrimitives.ReadUInt16BigEndian(rawSpan.Slice(TsCrypt.MacLen + 2));
-			PacketTypeFlagged = Raw[TsCrypt.MacLen + 4];
+			PacketId = BinaryPrimitives.ReadUInt16BigEndian(rawSpan.Slice(PacketCipher.MacLen));
+			ext.ClientId = BinaryPrimitives.ReadUInt16BigEndian(rawSpan.Slice(PacketCipher.MacLen + 2));
+			PacketTypeFlagged = Raw[PacketCipher.MacLen + 4];
 			HeaderExt = (TDir)(object)ext;
 		}
 		else

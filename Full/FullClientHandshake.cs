@@ -9,9 +9,10 @@
 
 using System;
 using TSLib.Commands;
+using TSLib.Crypto;
+using TSLib.Full.Transport;
 using TSLib.Messages;
 using TSLib.Shared;
-using TSLib.Crypto;
 
 namespace TSLib.Full;
 
@@ -24,7 +25,7 @@ internal static class FullClientHandshake
 {
 	/// <summary>Старое (TS3) рукопожатие: общий секрет из alpha/beta/omega.</summary>
 	public static E<string> CryptoInit(ConnectionContext ctx, InitIvExpand notify)
-		=> ctx.TsCrypt.CryptoInit(notify.Alpha, notify.Beta, notify.Omega);
+		=> ctx.PacketCipher.CryptoInit(notify.Alpha, notify.Beta, notify.Omega);
 
 	/// <summary>
 	/// Новое (лицензионное) рукопожатие, фаза 1: генерирует временную ключевую пару,
@@ -33,7 +34,7 @@ internal static class FullClientHandshake
 	/// </summary>
 	public static (TsCommand Command, byte[] TemporaryPrivateKey) BuildClientEk(ConnectionContext ctx, InitIvExpand2 notify)
 	{
-		var (publicKey, privateKey) = TsCrypt.GenerateTemporaryKey();
+		var (publicKey, privateKey) = PacketCipher.GenerateTemporaryKey();
 
 		var ekBase64 = Convert.ToBase64String(publicKey);
 		var toSign = new byte[86];
@@ -52,7 +53,7 @@ internal static class FullClientHandshake
 
 	/// <summary>Новое рукопожатие, фаза 2 (после отправки clientek): общий секрет.</summary>
 	public static E<string> CryptoInit2(ConnectionContext ctx, InitIvExpand2 notify, byte[] temporaryPrivateKey)
-		=> ctx.TsCrypt.CryptoInit2(notify.License, notify.Omega, notify.Proof, notify.Beta, temporaryPrivateKey);
+		=> ctx.PacketCipher.CryptoInit2(notify.License, notify.Omega, notify.Proof, notify.Beta, temporaryPrivateKey);
 
 	/// <summary>Финальная команда clientinit с данными подключения (после успешного CryptoInit/CryptoInit2).</summary>
 	public static TsCommand BuildClientInit(ConnectionDataFull cdf)

@@ -15,7 +15,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using TSLib.Helper;
-using TSLib.Crypto;
 using TSLib.Shared;
 using static TSLib.Full.Transport.PacketHandlerConst;
 
@@ -23,7 +22,7 @@ namespace TSLib.Full.Transport;
 
 internal sealed class PacketHandler<TIn, TOut>
 {
-	private static readonly int OutHeaderSize = TsCrypt.MacLen + Packet<TOut>.HeaderLength;
+	private static readonly int OutHeaderSize = PacketCipher.MacLen + Packet<TOut>.HeaderLength;
 	private static readonly int MaxOutContentSize = MaxOutPacketSize - OutHeaderSize;
 
 	// Timout calculations
@@ -52,7 +51,7 @@ internal sealed class PacketHandler<TIn, TOut>
 	private readonly RingQueue<Packet<TIn>> receiveQueueCommandLow;
 	// ====
 	private readonly object sendLoopLock = new object();
-	private readonly TsCrypt tsCrypt;
+	private readonly PacketCipher cipher;
 	private Socket? socket;
 	private Timer? resendTimer;
 	private DateTime pingCheck;
@@ -68,7 +67,7 @@ internal sealed class PacketHandler<TIn, TOut>
 	public PacketEvent<TIn>? PacketEvent;
 	public Action<Reason?>? StopEvent;
 
-	public PacketHandler(TsCrypt ts3Crypt, Id id)
+	public PacketHandler(PacketCipher cipher, Id id)
 	{
 		receiveQueueCommand = new RingQueue<Packet<TIn>>(ReceivePacketWindowSize, ushort.MaxValue + 1);
 		receiveQueueCommandLow = new RingQueue<Packet<TIn>>(ReceivePacketWindowSize, ushort.MaxValue + 1);
@@ -77,9 +76,9 @@ internal sealed class PacketHandler<TIn, TOut>
 
 		NetworkStats = new NetworkStats();
 
-		packetCounter = new ushort[TsCrypt.PacketTypeKinds];
-		generationCounter = new uint[TsCrypt.PacketTypeKinds];
-		this.tsCrypt = ts3Crypt;
+		packetCounter = new ushort[PacketCipher.PacketTypeKinds];
+		generationCounter = new uint[PacketCipher.PacketTypeKinds];
+		this.cipher = cipher;
 		this.id = id;
 	}
 
@@ -94,7 +93,7 @@ internal sealed class PacketHandler<TIn, TOut>
 		//  it because the packed-ids the server expects are fixed.
 		IncPacketCounter(PacketType.Command);
 		// Send the actual new init packet.
-		return AddOutgoingPacket(tsCrypt.ProcessInit1<TIn>(null).Value, PacketType.Init1);
+		return AddOutgoingPacket(cipher.ProcessInit1<TIn>(null).Value, PacketType.Init1);
 	}
 
 	public void Listen(IPEndPoint address)
@@ -312,7 +311,7 @@ internal sealed class PacketHandler<TIn, TOut>
 		default: throw Tools.UnhandledDefault(packet.PacketType);
 		}
 
-		tsCrypt.Encrypt(ref packet);
+		cipher.Encrypt(ref packet);
 
 		return SendRaw(ref packet);
 	}
@@ -386,7 +385,7 @@ internal sealed class PacketHandler<TIn, TOut>
 			LogRaw.Trace("[I] Raw {0}", DebugUtil.DebugToHex(packet.Raw));
 
 		FindIncommingGenerationId(ref packet);
-		if (!tsCrypt.Decrypt(ref packet))
+		if (!cipher.Decrypt(ref packet))
 		{
 			LogRaw.Warn("Dropping not decryptable packet: {0}", DebugUtil.DebugToHex(packet.Raw));
 			return;
@@ -622,7 +621,7 @@ internal sealed class PacketHandler<TIn, TOut>
 			if (initPacketCheck is null)
 				return true;
 			// optional: add random number check from init data
-			var forwardData = tsCrypt.ProcessInit1<TIn>(packet.Data);
+			var forwardData = cipher.ProcessInit1<TIn>(packet.Data);
 			if (!forwardData.Ok)
 			{
 				LogRaw.Debug("Error init: {0}", forwardData.Error);
@@ -686,7 +685,7 @@ internal sealed class PacketHandler<TIn, TOut>
 			var now = Tools.Now;
 			var nextTest = now - pingCheck - PingInterval;
 			// we need to check if CryptoInitComplete because while false packet ids won't be incremented
-			if (nextTest > TimeSpan.Zero && tsCrypt.CryptoInitComplete)
+			if (nextTest > TimeSpan.Zero && cipher.CryptoInitComplete)
 			{
 				// Check that the last ping is more than PingInterval but not more than
 				// 2*PingInterval away. This might happen for e.g. when the process was

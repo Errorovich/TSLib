@@ -21,15 +21,15 @@ dotnet build TSLib.csproj
 |---|---|
 | `Shared/` | Пассивные типы протокола: ID-структуры (`Types`), enum'ы (`TsEnums`), генерённые таблицы (`TsErrorCode`, `TsPermission`, `TsVersion`), `ConnectionData`, `DisconnectEventArgs`, `TsDnsResolver`, примитивы проводного формата `TsString` (escape/unescape) и `TsConst` (лимиты сервера) |
 | `ClientBase/` | Общий каркас обоих клиентов: `TsBaseFunctions` (база full/query + генерённые обёртки команд), `MessageProcessor`, `WaitBlock`, `EventDispatcher`, `LazyNotification` |
-| `Crypto/` | Идентичность и криптография: `TsCrypt`, `IdentityData`, `License` (сюда же ляжет авторизация TS5/TS6) |
+| `Crypto/` | Идентичность и криптография: статические утилиты `TsCrypt` (identity, хеши, подписи), `IdentityData`, `License` (сюда же ляжет авторизация TS5/TS6) |
 | `Commands/` | Исходящее направление (клиент → сервер): построитель `TsCommand` и виды параметров |
 | `Messages/` | Входящее направление (сервер → клиент): `Deserializer`, генерённые классы уведомлений/ответов |
-| `Full/` | Полный (голосовой) клиент: `TsFullClient`, `ConnectionContext`, `FullClientHandshake`; `Full/Transport/` — пакетный уровень (`Packet`, `PacketHandler`, `VoicePacket`, `QuickerLz`…); `Full/Book/` — реплицируемое состояние сервера |
+| `Full/` | Полный (голосовой) клиент: `TsFullClient`, `ConnectionContext`, `FullClientHandshake`; `Full/Transport/` — пакетный уровень (`Packet`, `PacketHandler`, `PacketCipher` — per-connection шифр AES-EAX, `VoicePacket`, `QuickerLz`…); `Full/Book/` — реплицируемое состояние сервера |
 | `Query/` | Query-клиент (`TsQueryClient`) |
 | `Audio/` | Аудио-пайплайн: интерфейсы и `Audio/Pipes/` (сегменты), `Audio/Opus/` (кодек) |
 | `Helper/`, `Scheduler/`, `Logging/` | Утилиты, планировщик (`DedicatedTaskScheduler`), логирование |
 
-Известная «восходящая» связь: `Crypto/TsCrypt` шифрует/дешифрует `Packet<TDir>` из `Full.Transport` (двунаправленная связка крипты и пакетного уровня); план — распилить `TsCrypt` на статические утилиты идентичности и per-connection пакетный шифр.
+Зависимости модулей однонаправленные: per-connection пакетный шифр (`Full/Transport/PacketCipher`) живёт рядом с `Packet`/`PacketHandler` и зовёт статические утилиты `Crypto/TsCrypt` — восходящих ссылок Crypto → Full нет.
 
 ## Кодогенерация (T4)
 
